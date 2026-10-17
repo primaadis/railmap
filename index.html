@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CS Rail Monitor - Jawa & Sumatera</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    #map { height: 100vh; width: 100%; z-index: 10; }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .pulse-alert {
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+      animation: pulse 1.6s infinite;
+    }
+    @keyframes pulse {
+      70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 flex h-screen overflow-hidden font-sans">
+
+  <!-- SIDEBAR: CS OPERATION DASHBOARD -->
+  <aside class="w-96 bg-white border-r border-slate-200 flex flex-col z-20 shadow-xl transition-all duration-300">
+    <!-- Header -->
+    <div class="p-4 bg-gradient-to-r from-blue-900 to-indigo-800 text-white shadow">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-train-subway text-2xl text-amber-400"></i>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">CS Rail Dashboard</h1>
+          <p class="text-xs text-blue-200">Monitoring Wilayah Operasi Jawa & Sumatera</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats for CS -->
+    <div class="grid grid-cols-3 gap-2 p-3 bg-slate-50 border-b text-center text-xs">
+      <div class="bg-white p-2 rounded shadow-sm border border-slate-200">
+        <span class="block text-slate-500">KA Aktif</span>
+        <span class="text-emerald-600 font-bold text-base" id="stat-active">148</span>
+      </div>
+      <div class="bg-white p-2 rounded shadow-sm border border-slate-200">
+        <span class="block text-slate-500">Tepat Waktu</span>
+        <span class="text-blue-600 font-bold text-base">96.4%</span>
+      </div>
+      <div class="bg-white p-2 rounded shadow-sm border border-slate-200">
+        <span class="block text-slate-500">Gangguan</span>
+        <span class="text-red-500 font-bold text-base" id="stat-delay">2 Titik</span>
+      </div>
+    </div>
+
+    <!-- Search Station / KA -->
+    <div class="p-3 border-b bg-white">
+      <label class="block text-xs font-semibold text-slate-600 mb-1">Cari Stasiun / Posisi KA:</label>
+      <div class="relative">
+        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
+        <input 
+          id="searchInput" 
+          type="text" 
+          placeholder="Contoh: Gambir, Yogyakarta, KA Argo..." 
+          class="w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 border-slate-300"
+          oninput="handleSearch(this.value)"
+        />
+      </div>
+    </div>
+
+    <!-- Navigasi Cepat Wilayah (Filter) -->
+    <div class="p-3 border-b bg-slate-50">
+      <label class="block text-xs font-semibold text-slate-600 mb-2">Lompat ke Wilayah Operasi:</label>
+      <div class="grid grid-cols-2 gap-1.5 text-xs">
+        <button onclick="zoomToRegion([-7.0, 110.0], 7)" class="px-2 py-1.5 bg-white hover:bg-indigo-50 border rounded text-slate-700 font-medium text-left">
+          <i class="fa-solid fa-map-pin text-indigo-500 mr-1"></i> Seluruh Jawa
+        </button>
+        <button onclick="zoomToRegion([-0.5, 101.5], 6)" class="px-2 py-1.5 bg-white hover:bg-indigo-50 border rounded text-slate-700 font-medium text-left">
+          <i class="fa-solid fa-map-pin text-indigo-500 mr-1"></i> Seluruh Sumatera
+        </button>
+        <button onclick="zoomToRegion([-6.1754, 106.8272], 11)" class="px-2 py-1.5 bg-white hover:bg-indigo-50 border rounded text-slate-700 text-left">
+          Daop 1 Jakarta
+        </button>
+        <button onclick="zoomToRegion([-7.7891, 110.3635], 11)" class="px-2 py-1.5 bg-white hover:bg-indigo-50 border rounded text-slate-700 text-left">
+          Daop 6 Yogyakarta
+        </button>
+        <button onclick="zoomToRegion([3.5952, 98.6722], 11)" class="px-2 py-1.5 bg-white hover:bg-indigo-50 border rounded text-slate-700 text-left">
+          Divre I Medan
+        </button>
+        <button onclick="zoomToRegion([-5.4297, 105.2625], 11)" class="px-2 py-1.5 bg-white hover:bg-indigo-50 border rounded text-slate-700 text-left">
+          Divre IV Tj. Karang
+        </button>
+      </div>
+    </div>
+
+    <!-- Panel Informasi Gangguan Jalur (Live Incident Feed) -->
+    <div class="flex-1 overflow-y-auto p-3 space-y-2">
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Status Pantauan Jalur CS</div>
+      
+      <!-- Alert Item 1 -->
+      <div class="p-2.5 bg-amber-50 border-l-4 border-amber-500 rounded text-xs shadow-sm cursor-pointer" onclick="zoomToRegion([-6.8833, 109.1333], 13)">
+        <div class="flex justify-between items-center mb-1">
+          <span class="font-bold text-amber-800"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Taspat (Pembatasan Kecepatan)</span>
+          <span class="text-[10px] text-amber-600">Baru saja</span>
+        </div>
+        <p class="text-slate-600">Petak Tegal - Brebes perbaikan wesel berkala. Est. keterlambatan 8-12 menit.</p>
+      </div>
+
+      <!-- Alert Item 2 -->
+      <div class="p-2.5 bg-red-50 border-l-4 border-red-500 rounded text-xs shadow-sm cursor-pointer" onclick="zoomToRegion([-3.7928, 103.7844], 12)">
+        <div class="flex justify-between items-center mb-1">
+          <span class="font-bold text-red-800"><i class="fa-solid fa-circle-exclamation mr-1"></i> Rintang Jalan / Antrian</span>
+          <span class="text-[10px] text-red-600">15m lalu</span>
+        </div>
+        <p class="text-slate-600">Divre III Lahat: Prioritas persilangan KA Batubara Rangkaian Panjang (Babaranjang).</p>
+      </div>
+
+      <!-- Train Status Card Preview -->
+      <div class="p-2.5 bg-emerald-50 border-l-4 border-emerald-500 rounded text-xs shadow-sm">
+        <div class="font-bold text-emerald-800 mb-1"><i class="fa-solid fa-circle-check mr-1"></i> Lintas Utara & Selatan Jawa</div>
+        <p class="text-slate-600">Jalur ganda (Double Track) beroperasi lancar dan aman terkendali.</p>
+      </div>
+    </div>
+
+    <!-- Footer CS Quick Action -->
+    <div class="p-3 bg-slate-100 border-t text-xs flex justify-between items-center text-slate-500">
+      <span>CS Hotline: <b>121 / (021) 121</b></span>
+      <button onclick="alert('Laporan diteruskan ke Pusat Kendali Operasi Kereta Api (PK/OC)')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded shadow text-xs">
+        + Buat Memo
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN MAP CONTAINER -->
+  <main class="flex-1 relative">
+    <div id="map"></div>
+
+    <!-- MAP STYLE SWITCHER (Floating Card) -->
+    <div class="absolute top-4 right-4 z-20 bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-lg border border-slate-200 text-xs">
+      <span class="font-bold text-slate-700 block mb-2"><i class="fa-solid fa-layer-group mr-1"></i> Tampilan Peta</span>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="setBaseMap('osm')" class="px-2.5 py-1.5 border rounded-lg bg-slate-50 hover:bg-indigo-50 font-medium text-slate-700 text-left">Standar</button>
+        <button onclick="setBaseMap('dark')" class="px-2.5 py-1.5 border rounded-lg bg-slate-800 hover:bg-slate-900 font-medium text-white text-left">Dark Mode</button>
+        <button onclick="setBaseMap('satellite')" class="px-2.5 py-1.5 border rounded-lg bg-emerald-700 hover:bg-emerald-800 font-medium text-white text-left">Satelit Esri</button>
+        <button onclick="setBaseMap('topo')" class="px-2.5 py-1.5 border rounded-lg bg-slate-200 hover:bg-slate-300 font-medium text-slate-800 text-left">Topografi</button>
+      </div>
+      
+      <div class="border-t mt-2.5 pt-2">
+        <label class="flex items-center gap-2 cursor-pointer text-slate-700">
+          <input type="checkbox" id="toggleRailways" checked onchange="toggleRailwayLayer()" class="rounded text-indigo-600" />
+          <span><b>Overlay Rel Detail</b> (ORM)</span>
+        </label>
+      </div>
+    </div>
+  </main>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // 1. INIT MAP LEAFLET (Fokus ke Pulau Jawa & Sumatera)
+    const map = L.map('map', {
+      center: [-4.5, 107.5],
+      zoom: 6,
+      zoomControl: false
+    });
+
+    // Pindahkan Zoom control ke pojok kanan bawah
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    // 2. LAYER PROVIDERS (Base Maps)
+    const baseLayers = {
+      osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+      }),
+      dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        attribution: '© CartoDB'
+      }),
+      satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: '© Esri World Imagery'
+      }),
+      topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        maxZoom: 17,
+        attribution: '© OpenTopoMap'
+      })
+    };
+
+    // Set Default Base Map
+    let currentBase = baseLayers.osm;
+    currentBase.addTo(map);
+
+    function setBaseMap(type) {
+      map.removeLayer(currentBase);
+      currentBase = baseLayers[type];
+      currentBase.addTo(map);
+      // Pastikan rel tetap di atas
+      if (map.hasLayer(railwayLayer)) {
+        railwayLayer.bringToFront();
+      }
+    }
+
+    // 3. OPENRAILWAYMAP TILE LAYER (Seluruh jalur rel aktif sedunia, Jawa & Sumatera sangat presisi)
+    const railwayLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: 'Data Jalur Rel © <a href="https://www.openrailwaymap.org">OpenRailwayMap</a>'
+    }).addTo(map);
+
+    function toggleRailwayLayer() {
+      const checkbox = document.getElementById('toggleRailways');
+      if (checkbox.checked) {
+        map.addLayer(railwayLayer);
+      } else {
+        map.removeLayer(railwayLayer);
+      }
+    }
+
+    // 4. DATA STASIUN UTAMA JAWA & SUMATERA (Sebagai titik informasi CS)
+    const stations = [
+      // JAWA
+      { name: "Gambir (GMR)", city: "Jakarta Pusat", coords: [-6.1767, 106.8306], region: "Daop 1 Jakarta", type: "Stasiun Besar Tipe A" },
+      { name: "Pasar Senen (PSE)", city: "Jakarta Pusat", coords: [-6.1748, 106.8447], region: "Daop 1 Jakarta", type: "Stasiun Besar Tipe A" },
+      { name: "Bandung (BD)", city: "Bandung", coords: [-6.9125, 107.6025], region: "Daop 2 Bandung", type: "Stasiun Besar Tipe A" },
+      { name: "Cirebon (CN)", city: "Cirebon", coords: [-6.7053, 108.5556], region: "Daop 3 Cirebon", type: "Stasiun Besar Tipe A" },
+      { name: "Semarang Tawang (SMT)", city: "Semarang", coords: [-6.9644, 110.4281], region: "Daop 4 Semarang", type: "Stasiun Besar Tipe A" },
+      { name: "Purwokerto (PWT)", city: "Banyumas", coords: [-7.4194, 109.2217], region: "Daop 5 Purwokerto", type: "Stasiun Besar Tipe A" },
+      { name: "Yogyakarta (YK)", city: "Yogyakarta", coords: [-7.7891, 110.3635], region: "Daop 6 Yogyakarta", type: "Stasiun Besar Tipe A" },
+      { name: "Solo Balapan (SLO)", city: "Surakarta", coords: [-7.5574, 110.8217], region: "Daop 6 Yogyakarta", type: "Stasiun Besar Tipe A" },
+      { name: "Madiun (MN)", city: "Madiun", coords: [-7.6186, 111.5244], region: "Daop 7 Madiun", type: "Stasiun Besar Tipe A" },
+      { name: "Surabaya Gubeng (SGU)", city: "Surabaya", coords: [-7.2654, 112.7521], region: "Daop 8 Surabaya", type: "Stasiun Besar Tipe A" },
+      { name: "Surabaya Pasarturi (SBI)", city: "Surabaya", coords: [-7.2482, 112.7313], region: "Daop 8 Surabaya", type: "Stasiun Besar Tipe A" },
+      { name: "Jember (JR)", city: "Jember", coords: [-8.1650, 113.7031], region: "Daop 9 Jember", type: "Stasiun Besar Tipe A" },
+      { name: "Ketapang (KTG)", city: "Banyuwangi", coords: [-8.1436, 114.3972], region: "Daop 9 Jember", type: "Stasiun Ujung Timur Jawa" },
+
+      // SUMATERA
+      { name: "Medan (MDN)", city: "Medan", coords: [3.5907, 98.6784], region: "Divre I Sumatera Utara", type: "Stasiun Bandara & Antarkota" },
+      { name: "Rantauprapat (RAP)", city: "Labuhanbatu", coords: [2.0953, 99.8286], region: "Divre I Sumatera Utara", type: "Stasiun Ujung Utara" },
+      { name: "Padang (PD)", city: "Padang", coords: [-0.9436, 100.3705], region: "Divre II Sumatera Barat", type: "Stasiun Utama Sumbar" },
+      { name: "Kertapati (KPT)", city: "Palembang", coords: [-3.0163, 104.7573], region: "Divre III Palembang", type: "Stasiun Utama Sumsel" },
+      { name: "Lubuklinggau (LLG)", city: "Lubuklinggau", coords: [-3.2941, 102.8617], region: "Divre III Palembang", type: "Stasiun Terminal Barat" },
+      { name: "Tanjung Karang (TNK)", city: "Bandar Lampung", coords: [-5.4057, 105.2581], region: "Divre IV Tj. Karang", type: "Stasiun Utama Lampung" }
+    ];
+
+    // Marker Custom Icon Stasiun
+    const stationIcon = L.divIcon({
+      className: 'bg-transparent',
+      html: `<div class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-md text-xs font-bold hover:scale-125 transition">S</div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
+    });
+
+    const markerGroup = L.layerGroup().addTo(map);
+
+    stations.forEach(stn => {
+      const popupContent = `
+        <div class="text-slate-800 p-1">
+          <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded">${stn.region}</span>
+          <h3 class="font-bold text-base mt-1 text-slate-900">${stn.name}</h3>
+          <p class="text-xs text-slate-500 mb-2">${stn.city} • ${stn.type}</p>
+          <div class="border-t pt-1.5 text-xs text-slate-600 space-y-1">
+            <div><i class="fa-solid fa-clock text-blue-600 mr-1"></i> Layanan Operasional: 24 Jam</div>
+            <div><i class="fa-solid fa-phone text-emerald-600 mr-1"></i> Kontak CS Stasiun: (021) 121</div>
+          </div>
+          <button onclick="alert('Membuka jadwal KA di stasiun ${stn.name}')" class="mt-2 w-full bg-indigo-600 text-white text-xs py-1.5 rounded font-medium hover:bg-indigo-700">
+            Lihat Jadwal Keberangkatan
+          </button>
+        </div>
+      `;
+
+      L.marker(stn.coords, { icon: stationIcon })
+        .bindPopup(popupContent)
+        .addTo(markerGroup);
+    });
+
+    // 5. SIMULASI POSISI LIVE KERETA API (Real-Time Simulation Tracker)
+    const trains = [
+      { id: "KA-01", name: "KA Argo Bromo Anggrek", route: "Gambir - Surabaya Pasarturi", lat: -6.85, lng: 109.5, speed: "98 km/jam", status: "Tepat Waktu" },
+      { id: "KA-44", name: "KA Taksaka", route: "Gambir - Yogyakarta", lat: -7.52, lng: 109.8, speed: "85 km/jam", status: "Tepat Waktu" },
+      { id: "KA-S1", name: "KA Sribilah Utama", route: "Medan - Rantauprapat", lat: 2.8, lng: 99.2, speed: "70 km/jam", status: "Tepat Waktu" },
+      { id: "KA-S2", name: "KA Rajabasa", route: "Kertapati - Tanjungkarang", lat: -4.3, lng: 104.4, speed: "65 km/jam", status: "Terlambat +8 Menit" }
+    ];
+
+    const trainIcon = L.divIcon({
+      className: 'bg-transparent',
+      html: `<div class="bg-amber-500 text-slate-900 w-7 h-7 rounded-full flex items-center justify-center border-2 border-white shadow-lg text-xs font-bold hover:scale-125 transition">
+              <i class="fa-solid fa-train"></i>
+             </div>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+
+    trains.forEach(trn => {
+      const trainPopup = `
+        <div class="p-1">
+          <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded">${trn.id}</span>
+          <h3 class="font-bold text-sm text-slate-900 mt-1">${trn.name}</h3>
+          <p class="text-xs text-slate-500">${trn.route}</p>
+          <div class="mt-2 text-xs border-t pt-1 space-y-0.5">
+            <div>Kecepatan: <b>${trn.speed}</b></div>
+            <div>Status: <b class="${trn.status.includes('Terlambat') ? 'text-red-600' : 'text-emerald-600'}">${trn.status}</b></div>
+          </div>
+        </div>
+      `;
+      L.marker([trn.lat, trn.lng], { icon: trainIcon })
+        .bindPopup(trainPopup)
+        .addTo(map);
+    });
+
+    // 6. HELPER FUNCTIONS
+    function zoomToRegion(center, zoomLevel) {
+      map.flyTo(center, zoomLevel, { duration: 1.5 });
+    }
+
+    // Fitur Pencarian Stasiun Cepat
+    function handleSearch(keyword) {
+      if (!keyword || keyword.length < 2) return;
+      const lower = keyword.toLowerCase();
+      const match = stations.find(s => s.name.toLowerCase().includes(lower) || s.city.toLowerCase().includes(lower));
+      if (match) {
+        map.flyTo(match.coords, 14, { duration: 1.2 });
+      }
+    }
+  </script>
+</body>
+</html>
