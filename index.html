@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="h-full">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KAI CS Rail Command Center - Jawa & Sumatera</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>KAI Rail Operations & Heritage GIS - Jawa & Sumatera</title>
 
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,172 +17,211 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Font Awesome Icons -->
+  <!-- Font Awesome Icons 6.5 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  <!-- Custom Futuristic Stylesheet -->
+  <!-- Custom Cinematic CSS -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body class="bg-[#0b0f19] text-slate-200 flex h-screen overflow-hidden antialiased">
+<body class="bg-[#070a11] text-slate-100 flex flex-col md:flex-row h-full overflow-hidden select-none antialiased">
 
-  <!-- SIDEBAR: COMMAND CENTER CS -->
-  <aside class="w-84 sm:w-96 bg-[#0f172a]/95 backdrop-blur-xl border-r border-slate-800 flex flex-col z-20 shadow-2xl shrink-0">
-    <!-- Header Futuristik -->
-    <div class="p-4 bg-gradient-to-r from-[#0b0f19] to-[#1e293b] border-b border-slate-800/80">
-      <div class="flex items-center justify-between">
+  <!-- TOP BAR MOBILE ONLY -->
+  <header class="md:hidden flex items-center justify-between px-4 py-2.5 bg-[#0d1322]/90 backdrop-blur-md border-b border-white/5 z-30 shrink-0">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-600 to-orange-500 flex items-center justify-center text-white shadow-md">
+        <i class="fa-solid fa-train text-xs"></i>
+      </div>
+      <div>
+        <h1 class="text-xs font-bold tracking-wide text-white">KAI GeoPortal</h1>
+        <p class="text-[9px] text-amber-400 font-mono">Operations & Heritage</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleMobileSidebar()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-white/10 rounded-lg text-[11px] font-semibold text-slate-200 flex items-center gap-1.5 active:scale-95 transition">
+        <i class="fa-solid fa-list-ul text-amber-400"></i>
+        <span>Katalog</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR DIREKTORI (DESKTOP DOCKED, MOBILE SLIDE-OVER) -->
+  <aside id="sidebarDirectory" class="fixed inset-y-0 left-0 w-84 sm:w-96 bg-[#0b0f19]/95 md:static md:translate-x-0 -translate-x-full backdrop-blur-2xl border-r border-white/5 flex flex-col z-40 transition-transform duration-300 ease-out shrink-0">
+    <!-- Header Sidebar -->
+    <div class="p-4 bg-gradient-to-b from-[#111827] to-[#0b0f19] border-b border-white/5">
+      <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 via-orange-600 to-red-600 flex items-center justify-center text-white shadow-lg shadow-orange-950/40">
             <i class="fa-solid fa-train-subway text-base"></i>
           </div>
           <div>
-            <h1 class="font-extrabold text-sm tracking-wider uppercase text-white flex items-center gap-2">
-              KAI Rail Monitor <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            <h1 class="font-bold text-sm tracking-wide text-white flex items-center gap-2">
+              KAI GIS Explorer <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             </h1>
-            <p class="text-[10px] text-slate-400 font-medium">Customer Service Operation Center</p>
+            <p class="text-[10px] text-slate-400">Jawa & Sumatera • Aktif & Bersejarah</p>
           </div>
         </div>
-        <span class="text-[9px] font-mono tracking-wider bg-slate-800 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full">
-          DAOP & DIVRE
-        </span>
+        <button onclick="toggleMobileSidebar()" class="md:hidden w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
-    </div>
 
-    <!-- Filter & Pencarian Cepat Stasiun -->
-    <div class="p-3.5 space-y-2.5 bg-[#0b0f19]/60 border-b border-slate-800">
-      <!-- Input Search -->
+      <!-- Quick Search Box -->
       <div class="relative">
         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
         <input 
           id="stationSearch"
           type="text" 
-          placeholder="Cari stasiun (Poncol, Senen, Medan...)" 
-          class="w-full pl-9 pr-8 py-2 text-xs bg-slate-900/90 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition shadow-inner"
+          placeholder="Cari stasiun, jalur mati, Daop..." 
+          class="w-full pl-9 pr-8 py-2 text-xs bg-slate-900/90 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition shadow-inner"
           oninput="handleSearch(this.value)"
         />
         <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs">
-          <i class="fa-solid fa-xmark"></i>
+          <i class="fa-solid fa-circle-xmark"></i>
         </button>
       </div>
+    </div>
 
-      <!-- Filter Dropdown Daop & Divre -->
-      <div class="flex items-center gap-2">
-        <label for="regionFilter" class="text-[10px] uppercase font-bold text-slate-400 tracking-wider shrink-0">
-          <i class="fa-solid fa-filter text-cyan-400 mr-1"></i> Filter:
-        </label>
-        <select 
-          id="regionFilter" 
-          onchange="handleRegionFilter(this.value)"
-          class="flex-1 bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-cyan-500 cursor-pointer"
-        >
-          <option value="ALL">Semua Wilayah (Daop 1 - Divre IV)</option>
-          <optgroup label="Pulau Jawa">
-            <option value="Daop 1 Jakarta">Daop 1 Jakarta</option>
-            <option value="Daop 2 Bandung">Daop 2 Bandung</option>
-            <option value="Daop 3 Cirebon">Daop 3 Cirebon</option>
-            <option value="Daop 4 Semarang">Daop 4 Semarang</option>
-            <option value="Daop 5 Purwokerto">Daop 5 Purwokerto</option>
-            <option value="Daop 6 Yogyakarta">Daop 6 Yogyakarta</option>
-            <option value="Daop 7 Madiun">Daop 7 Madiun</option>
-            <option value="Daop 8 Surabaya">Daop 8 Surabaya</option>
-            <option value="Daop 9 Jember">Daop 9 Jember</option>
-          </optgroup>
-          <optgroup label="Pulau Sumatera">
-            <option value="Divre I Sumatera Utara">Divre I Sumatera Utara</option>
-            <option value="Divre II Sumatera Barat">Divre II Sumatera Barat</option>
-            <option value="Divre III Palembang">Divre III Palembang</option>
-            <option value="Divre IV Tanjungkarang">Divre IV Tanjungkarang</option>
-          </optgroup>
-        </select>
+    <!-- FILTER HORIZONTAL SLIDEABLE NAVIGATION (TOUCH FRIENDLY) -->
+    <div class="border-b border-white/5 bg-[#080c14]/80 px-3 py-2">
+      <div class="text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center justify-between">
+        <span><i class="fa-solid fa-sliders text-amber-500 mr-1"></i> Filter Layanan Rel</span>
+        <span class="text-[9px] font-mono text-slate-500" id="filterStatusLabel">Semua</span>
+      </div>
+      <!-- Scrollable Pills -->
+      <div class="slide-nav flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+        <button onclick="filterCategory('all', this)" class="category-pill active" data-cat="all">Semua</button>
+        <button onclick="filterCategory('antarkota', this)" class="category-pill" data-cat="antarkota">Antarkota</button>
+        <button onclick="filterCategory('whoosh', this)" class="category-pill" data-cat="whoosh">Whoosh</button>
+        <button onclick="filterCategory('commuter', this)" class="category-pill" data-cat="commuter">KRL / Lokal</button>
+        <button onclick="filterCategory('bandara', this)" class="category-pill" data-cat="bandara">Bandara / Feeder</button>
+        <button onclick="filterCategory('heritage', this)" class="category-pill" data-cat="heritage">Jalur Non-Aktif</button>
       </div>
     </div>
 
-    <!-- Statistik Total Terpantau -->
-    <div class="px-4 py-2 bg-slate-900/40 border-b border-slate-800/60 flex justify-between items-center text-[11px] text-slate-400">
-      <span>Stasiun Ditampilkan:</span>
-      <span id="stationCountDisplay" class="font-bold text-cyan-400 font-mono">0 Titik</span>
+    <!-- Dropdown Daop / Divre Filter -->
+    <div class="px-3 py-2 bg-[#090d18] border-b border-white/5 flex items-center justify-between text-xs">
+      <select 
+        id="regionSelect" 
+        onchange="handleRegionSelect(this.value)"
+        class="w-full bg-slate-900 border border-white/10 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500"
+      >
+        <option value="ALL">Semua Daop & Divre</option>
+        <optgroup label="Pulau Jawa">
+          <option value="Daop 1 Jakarta">Daop 1 Jakarta</option>
+          <option value="Daop 2 Bandung">Daop 2 Bandung</option>
+          <option value="Daop 3 Cirebon">Daop 3 Cirebon</option>
+          <option value="Daop 4 Semarang">Daop 4 Semarang</option>
+          <option value="Daop 5 Purwokerto">Daop 5 Purwokerto</option>
+          <option value="Daop 6 Yogyakarta">Daop 6 Yogyakarta</option>
+          <option value="Daop 7 Madiun">Daop 7 Madiun</option>
+          <option value="Daop 8 Surabaya">Daop 8 Surabaya</option>
+          <option value="Daop 9 Jember">Daop 9 Jember</option>
+        </optgroup>
+        <optgroup label="Pulau Sumatera">
+          <option value="Divre I Sumatera Utara">Divre I Sumatera Utara</option>
+          <option value="Divre II Sumatera Barat">Divre II Sumatera Barat</option>
+          <option value="Divre III Palembang">Divre III Palembang</option>
+          <option value="Divre IV Tanjungkarang">Divre IV Tanjungkarang</option>
+        </optgroup>
+        <optgroup label="Cagar Budaya & Jalur Non-Aktif">
+          <option value="Heritage NIS / SS">Heritage Sejarah NIS / SS / DSM</option>
+        </optgroup>
+      </select>
     </div>
 
-    <!-- List Stasiun Terstruktur (Scrollable) -->
+    <!-- Total Display -->
+    <div class="px-4 py-1.5 bg-[#070b14] border-b border-white/5 flex justify-between items-center text-[10px] text-slate-400">
+      <span>Stasiun Sesuai Kriteria:</span>
+      <span id="stationCountDisplay" class="font-bold text-amber-400 font-mono">0 Titik</span>
+    </div>
+
+    <!-- Station Directory List (Grouped) -->
     <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar" id="stationListContainer">
-      <!-- Diisi oleh JS berdasarkan urutan Daop 1 - Divre IV -->
+      <!-- Diisi otomatis oleh JavaScript -->
     </div>
 
-    <!-- Footer CS: Access by KAI & 121 Hotline -->
-    <div class="p-3 bg-slate-900/90 border-t border-slate-800 space-y-2 shrink-0">
+    <!-- Contact & Access by KAI Footer -->
+    <div class="p-3 bg-[#0d1322] border-t border-white/5 space-y-2 shrink-0">
       <div class="grid grid-cols-2 gap-2 text-xs">
-        <a href="https://wa.me/6281112111121" target="_blank" class="flex items-center justify-center gap-1.5 p-2 bg-emerald-600/90 hover:bg-emerald-600 text-white rounded-xl font-medium transition shadow-sm hover:shadow-emerald-500/20">
-          <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp 121
+        <a href="https://wa.me/6281112111121" target="_blank" class="flex items-center justify-center gap-1.5 p-2 bg-emerald-600/90 hover:bg-emerald-600 text-white rounded-xl font-medium transition shadow-sm">
+          <i class="fa-brands fa-whatsapp text-sm"></i> KAI 121
         </a>
-        <a href="tel:121" class="flex items-center justify-center gap-1.5 p-2 bg-blue-600/90 hover:bg-blue-600 text-white rounded-xl font-medium transition shadow-sm hover:shadow-blue-500/20">
-          <i class="fa-solid fa-phone text-xs"></i> Telepon 121
+        <a href="https://booking.kai.id" target="_blank" class="flex items-center justify-center gap-1.5 p-2 bg-orange-600/90 hover:bg-orange-600 text-white rounded-xl font-medium transition shadow-sm">
+          <i class="fa-solid fa-ticket text-xs"></i> Access by KAI
         </a>
       </div>
-      <a href="https://booking.kai.id" target="_blank" class="block w-full py-2 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-center text-xs font-bold rounded-xl shadow-md transition shadow-orange-600/20">
-        <i class="fa-solid fa-ticket mr-1.5"></i> Portal Tiket Access by KAI
-      </a>
     </div>
   </aside>
 
-  <!-- MAP CONTAINER UTAMA -->
-  <main class="flex-1 relative">
-    <div id="map"></div>
+  <!-- OVERLAY BACKDROP UNTUK MOBILE SIDEBAR -->
+  <div id="mobileBackdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 hidden md:hidden transition-opacity"></div>
 
-    <!-- FLOATING MAP CONTROLLER (FUTURISTIC GLASS PANEL) -->
-    <div class="absolute top-4 right-4 z-20 bg-[#0f172a]/90 backdrop-blur-xl shadow-2xl border border-slate-700/80 rounded-2xl p-3.5 w-68 text-xs text-slate-200">
-      <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-700/70">
-        <span class="font-bold tracking-wider uppercase text-[11px] text-cyan-400 flex items-center gap-1.5">
-          <i class="fa-solid fa-layer-group"></i> Layer Kartografi
-        </span>
-      </div>
+  <!-- AREA PETA UTAMA -->
+  <main class="flex-1 relative h-full">
+    <div id="map" class="h-full w-full"></div>
 
-      <!-- Mode Khusus: Fokus Hanya Jalur Rel -->
-      <button onclick="setBaseMap('trackonly')" id="btn-mode-trackonly" class="w-full mb-2 p-2 rounded-xl border text-left flex items-center justify-between bg-cyan-950/60 border-cyan-500/80 text-cyan-300 font-bold transition">
-        <span class="flex items-center gap-1.5"><i class="fa-solid fa-road"></i> Fokus Rel Bersih</span>
-        <i class="fa-solid fa-check text-cyan-400" id="check-trackonly"></i>
+    <!-- FLOATING MAP CONTROLS (RESPONSIVE) -->
+    <div class="absolute top-3 right-3 z-20 flex flex-col items-end gap-2">
+      <!-- Layer Toggle Trigger Button -->
+      <button onclick="toggleLayerMenu()" class="px-3 py-2 bg-[#0d1322]/90 hover:bg-slate-800 backdrop-blur-xl border border-white/10 rounded-xl text-xs font-semibold text-slate-200 shadow-2xl flex items-center gap-2 active:scale-95 transition">
+        <i class="fa-solid fa-layer-group text-amber-400"></i>
+        <span class="hidden sm:inline">Mode Peta</span>
       </button>
 
-      <!-- Mode Lainnya: Standar & Satelit Esri -->
-      <div class="grid grid-cols-2 gap-1.5 mb-2.5">
-        <button onclick="setBaseMap('osm')" id="btn-mode-osm" class="p-2 border border-slate-700 bg-slate-900/60 hover:bg-slate-800 rounded-xl text-left transition">
-          <span class="font-semibold block text-slate-300">Peta Standar</span>
-          <span class="text-[9px] text-slate-500">OpenStreetMap</span>
+      <!-- Expandable Layer Switcher Menu -->
+      <div id="layerMenuDropdown" class="hidden w-56 sm:w-64 bg-[#0d1322]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-3 shadow-2xl text-xs space-y-2">
+        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 pb-1 border-b border-white/5">
+          Tampilan Kartografi
+        </div>
+        <button onclick="setBaseMap('trackonly')" id="btn-trackonly" class="w-full p-2 rounded-xl border text-left flex items-center justify-between bg-amber-500/10 border-amber-500/50 text-amber-300 font-bold transition">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-road text-amber-400"></i> Fokus Rel Bersih</span>
+          <i class="fa-solid fa-check text-amber-400" id="check-trackonly"></i>
         </button>
-        <button onclick="setBaseMap('satellite')" id="btn-mode-satellite" class="p-2 border border-slate-700 bg-slate-900/60 hover:bg-slate-800 rounded-xl text-left transition">
-          <span class="font-semibold block text-slate-300">Citra Satelit</span>
-          <span class="text-[9px] text-slate-500">Esri Realistis</span>
-        </button>
-      </div>
-
-      <!-- Toggle Overlay Jalur Rel OpenRailwayMap -->
-      <div class="border-t border-slate-700/70 pt-2">
-        <label class="flex items-center justify-between cursor-pointer py-0.5">
-          <span class="text-[11px] font-medium text-slate-300 flex items-center gap-1.5">
-            <i class="fa-solid fa-code-fork text-orange-400"></i> Overlay Detail Rel (ORM)
-          </span>
-          <input type="checkbox" id="railOverlayToggle" checked onchange="toggleRailOverlay(this.checked)" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
-        </label>
+        <div class="grid grid-cols-2 gap-1.5">
+          <button onclick="setBaseMap('osm')" class="p-2 border border-white/10 bg-slate-900/80 rounded-xl text-left hover:bg-slate-800 transition">
+            <span class="font-medium block text-slate-300">Standar</span>
+            <span class="text-[9px] text-slate-500">Peta Jalan</span>
+          </button>
+          <button onclick="setBaseMap('satellite')" class="p-2 border border-white/10 bg-slate-900/80 rounded-xl text-left hover:bg-slate-800 transition">
+            <span class="font-medium block text-slate-300">Satelit</span>
+            <span class="text-[9px] text-slate-500">Citra Esri</span>
+          </button>
+        </div>
+        <div class="pt-1.5 border-t border-white/5">
+          <label class="flex items-center justify-between cursor-pointer text-[11px] text-slate-300">
+            <span><i class="fa-solid fa-code-fork text-orange-400 mr-1"></i> Overlay Rel Lengkap</span>
+            <input type="checkbox" id="railOverlayToggle" checked onchange="toggleRailOverlay(this.checked)" class="rounded text-amber-500">
+          </label>
+        </div>
       </div>
     </div>
 
-    <!-- DRAWER DETAIL STASIUN (SLIDE IN DARI KANAN) -->
-    <div id="stationDrawer" class="absolute top-0 right-0 h-full w-full sm:w-[440px] bg-[#0f172a]/95 backdrop-blur-2xl shadow-2xl z-30 translate-x-full border-l border-slate-800 flex flex-col overflow-hidden">
+    <!-- DRAWER DETAIL STASIUN (RESPONSIVE: SLIDE-UP BOTTOM SHEET DI HP, SLIDE-IN KANAN DI DESKTOP) -->
+    <div id="stationDrawer" class="station-sheet fixed md:absolute bottom-0 md:top-0 right-0 w-full md:w-[420px] max-h-[82vh] md:max-h-full h-auto md:h-full bg-[#0d1322]/98 backdrop-blur-2xl shadow-2xl z-40 translate-y-full md:translate-y-0 md:translate-x-full border-t md:border-t-0 md:border-l border-white/10 flex flex-col rounded-t-3xl md:rounded-none overflow-hidden transition-transform duration-300 ease-out">
+      
+      <!-- Drag Handle for Mobile Sheet -->
+      <div class="md:hidden flex justify-center pt-2.5 pb-1">
+        <div class="w-12 h-1.5 rounded-full bg-slate-700"></div>
+      </div>
+
       <!-- Header Drawer -->
-      <div class="p-4 bg-gradient-to-r from-slate-950 to-slate-900 border-b border-slate-800 flex justify-between items-center shrink-0">
+      <div class="p-4 bg-gradient-to-r from-[#111827] to-[#0d1322] border-b border-white/5 flex justify-between items-center shrink-0">
         <div>
-          <span id="drawerBadge" class="text-[9px] font-bold font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 tracking-wider uppercase">
-            DAOP / DIVRE
-          </span>
+          <div class="flex items-center gap-1.5">
+            <span id="drawerBadgeType" class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full tracking-wider uppercase">TIPE</span>
+            <span id="drawerBadgeStatus" class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full tracking-wider uppercase">STATUS</span>
+          </div>
           <h2 id="drawerTitle" class="font-extrabold text-base text-white leading-tight mt-1">Nama Stasiun</h2>
         </div>
-        <button onclick="closeDrawer()" class="w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+        <button onclick="closeStationDrawer()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
-      <!-- Konten Drawer (Scrollable) -->
+      <!-- Isi Informasi Stasiun (Scrollable) -->
       <div class="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs custom-scrollbar">
-        <!-- Foto / Dokumentasi Stasiun -->
-        <div class="rounded-2xl overflow-hidden border border-slate-700/80 shadow-lg relative bg-slate-950 h-48 group">
+        <!-- Foto / Dokumentasi Lapangan -->
+        <div class="rounded-2xl overflow-hidden border border-white/10 relative bg-slate-950 h-44 group">
           <img 
             id="drawerImage" 
             src="" 
@@ -190,52 +229,52 @@
             class="w-full h-full object-cover transition duration-300 group-hover:scale-105"
             onerror="this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80'"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
-          <div class="absolute bottom-2.5 left-3">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+          <div class="absolute bottom-2 left-3">
             <span class="text-white font-bold text-xs" id="drawerCity">Kota / Wilayah</span>
-            <p class="text-[10px] text-cyan-300 font-mono" id="drawerAltitude">- mdpl</p>
+            <p class="text-[10px] text-amber-400 font-mono" id="drawerElevation">- mdpl</p>
           </div>
-          <span class="absolute top-2.5 right-3 text-[9px] font-mono bg-black/60 px-2 py-0.5 rounded text-slate-400" id="drawerFileRef">
-            assets/images/...
+          <span class="absolute top-2 right-2 text-[9px] font-mono bg-black/70 px-2 py-0.5 rounded text-slate-400" id="drawerYears">
+            Operasional: Aktif
           </span>
         </div>
 
-        <!-- Ulasan Operasional & CS Notes -->
-        <div class="bg-slate-900/80 border border-cyan-500/30 rounded-2xl p-3.5 shadow-sm">
-          <span class="font-bold text-cyan-400 flex items-center gap-1.5 mb-1.5 text-xs">
-            <i class="fa-solid fa-clipboard-check"></i> Ulasan & Karakteristik Operasional CS:
+        <!-- Ulasan CS / Narasi Sejarah -->
+        <div id="drawerReviewBox" class="p-3.5 rounded-2xl border transition">
+          <span id="drawerReviewTitle" class="font-bold flex items-center gap-1.5 mb-1.5 text-xs">
+            <i class="fa-solid fa-circle-info"></i> Ulasan & Karakteristik Operasional:
           </span>
-          <p id="drawerReview" class="text-slate-300 leading-relaxed text-[11px]">-</p>
+          <p id="drawerReview" class="leading-relaxed text-[11px] text-slate-300">-</p>
         </div>
 
-        <!-- Fasilitas Utama -->
+        <!-- Fasilitas / Peninggalan Bersejarah -->
         <div>
-          <span class="font-bold text-slate-300 block mb-2 text-xs">Fasilitas Penumpang:</span>
+          <span class="font-bold text-slate-300 block mb-2 text-xs" id="drawerFacilitiesLabel">Fasilitas Penumpang:</span>
           <div id="drawerFacilities" class="grid grid-cols-2 gap-1.5"></div>
         </div>
 
-        <!-- Skema Denah & Akses Boarding -->
-        <div class="border border-slate-800 rounded-2xl p-3.5 bg-slate-900/50">
+        <!-- Skema Akses & Denah Boarding -->
+        <div class="border border-white/5 rounded-2xl p-3 bg-slate-900/60">
           <span class="font-bold text-slate-200 block mb-1 text-xs">
-            <i class="fa-solid fa-map-location-dot text-orange-400 mr-1"></i> Skema Denah & Akses Boarding:
+            <i class="fa-solid fa-map-location-dot text-amber-400 mr-1"></i> Panduan Denah & Akses:
           </span>
-          <p id="drawerLayoutGuide" class="text-slate-400 leading-relaxed text-[11px] mb-2.5">-</p>
-          <a id="drawerLayoutLink" href="#" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-cyan-400 font-semibold hover:text-cyan-300 transition">
-            Lihat Denah di Google Maps <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          <p id="drawerLayoutGuide" class="text-slate-400 leading-relaxed text-[11px] mb-2">-</p>
+          <a id="drawerLayoutLink" href="#" target="_blank" class="inline-flex items-center gap-1 text-xs text-amber-400 font-semibold hover:underline">
+            Buka Peta Lokasi di Google Maps <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
           </a>
         </div>
       </div>
 
       <!-- Action Footer Drawer -->
-      <div class="p-3.5 bg-slate-950 border-t border-slate-800 space-y-2 shrink-0 text-xs">
-        <a id="drawerBookingLink" href="https://booking.kai.id" target="_blank" class="block w-full py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-center font-bold rounded-xl shadow-lg transition">
-          <i class="fa-solid fa-ticket mr-1.5"></i> Buka Jadwal di Access by KAI
+      <div class="p-3.5 bg-[#0b0f19] border-t border-white/5 space-y-2 shrink-0 text-xs">
+        <a id="drawerTicketBtn" href="https://booking.kai.id" target="_blank" class="block w-full py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-center font-bold rounded-xl shadow-lg transition">
+          <i class="fa-solid fa-ticket mr-1.5"></i> Cek Tiket di Access by KAI
         </a>
         <div class="flex gap-2">
-          <a href="https://wa.me/6281112111121" target="_blank" class="flex-1 py-2 bg-emerald-600/90 hover:bg-emerald-600 text-white text-center font-semibold rounded-xl transition">
-            Hubungi WA 121
+          <a href="https://wa.me/6281112111121" target="_blank" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-center font-semibold rounded-xl transition">
+            Hubungi CS 121
           </a>
-          <button onclick="closeDrawer()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition">
+          <button onclick="closeStationDrawer()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition">
             Tutup
           </button>
         </div>
