@@ -1,65 +1,67 @@
 ================================================================================
-   DOKUMENTASI SISTEM & PETUNJUK CS RAIL MONITOR (PULAU JAWA & SUMATERA)
+   DOKUMENTASI KAI CS RAIL COMMAND CENTER - JAWA & SUMATERA (V3.0 FINAL)
 ================================================================================
 
-1. CARA PENGGUNAAN PETA OLEH TIM CUSTOMER SERVICE (CS):
+1. LOGIKA NAVIGASI & PENGGUNAAN PETA OLEH CS:
 --------------------------------------------------------------------------------
-A. Pembatasan Wilayah Indonesia (Focus Lock):
-   - Peta dikunci pada koordinat Pulau Jawa, Sumatera, dan Bali. Petugas tidak
-     akan tersesat ke luar wilayah Indonesia saat menggeser atau memperkecil peta.
+A. Peta Bebas & Utuh (Full Global Support):
+   - Pembatasan ketat koordinat (maxBounds) telah dihilangkan. Peta dapat digeser
+     dan di-zoom secara mulus tanpa batas kaku.
+   - Peta default tetap difokuskan langsung ke gugusan rel Pulau Jawa & Sumatera.
 
-B. Pilihan Mode Tampilan:
-   - "Hanya Jalur Rel (Fokus)": Mode default CS yang menyembunyikan nama jalan/gedung
-     sehingga petugas dapat fokus melihat konektivitas rel, wesel, dan emplasemen.
-   - "Peta Standar": Mengaktifkan kembali kartografi jalan umum OpenStreetMap.
-   - "Citra Satelit": Menampilkan permukaan bumi resolusi tinggi berbasis Esri.
+B. Tampilan Kartografi Command Center:
+   - "Fokus Rel Bersih": Mode default operasional CS. Latar belakang disederhanakan
+     (kanvas abu-abu polos tanpa nama jalan raya) sehingga visualisasi wesel,
+     jalur ganda, dan titik stasiun terlihat sangat jelas dan kontras.
+   - "Peta Standar": Menampilkan kartografi jalan umum OpenStreetMap jika CS
+     perlu memandu akses jalan penumpang ke arah stasiun.
+   - "Citra Satelit": Menampilkan foto satelit bumi Esri resolusi tinggi secara legal
+     dan tanpa pesan error token API.
+   - "Overlay Detail Rel (ORM)": Menampilkan data teknis OpenRailwayMap (wesel,
+     jalur langsiran, dan percabangan).
 
-C. Fitur Live Train (Menu Terpilih - Default Nonaktif):
-   - Fitur kereta berjalan TIDAK otomatis menyala untuk menghemat daya & memori.
-   - Untuk mengaktifkan: Klik switch toggle "Pantau Kereta Berjalan" di menu kanan.
-   - Menampilkan animasi mini kartun chibi kereta yang melaju di atas jalurnya.
-   - Terintegrasi dengan jam komputer/server: Kereta hanya muncul saat jam
-     keberangkatan KA tersebut sedang aktif di dunia nyata (Gapeka).
+C. Filter Terstruktur Daop 1 s.d. Divre IV:
+   - Stasiun di sidebar dikelompokkan dan diurutkan secara tertib dari barat ke
+     timur (Daop 1 Jakarta hingga Daop 9 Jember), dilanjutkan dengan Divre I Medan
+     hingga Divre IV Tanjungkarang.
+   - CS dapat memilih Daop/Divre spesifik melalui menu dropdown, atau mengetik
+     langsung nama stasiun (misal: "Poncol", "Tawang", "Lempuyangan", "Medan").
 
-D. Stasiun & Informasi CS:
-   - Klik stasiun mana saja (termasuk Semarang Poncol, Semarang Tawang, Senen, dll.)
-     untuk memunculkan panel kanan berisi review fasilitas, pintu boarding, dan denah.
-   - Tersedia tombol cepat ke "Access by KAI" dan "WhatsApp KAI 121".
+D. Drawer Informasi & Layanan Penumpang:
+   - Klik stasiun mana saja untuk membuka drawer sisi kanan.
+   - Menyajikan data elevasi ketinggian (mdpl), ulasan CS mengenai karakteristik
+     stasiun, checklist fasilitas, dan panduan alur gerbang boarding.
+   - Tersedia tautan langsung ke portal tiket Access by KAI (`booking.kai.id`)
+     dan kontak resmi WhatsApp KAI 121 (`0811-1211-1121`).
 
 
-2. STRUKTUR PROYEK & PANDUAN GITHUB REPOSITORY:
+2. CARA MENGGANTI FOTO STASIUN DI REPOSITORY GITHUB:
 --------------------------------------------------------------------------------
-Untuk mengunggah proyek ini ke GitHub:
-1. Pastikan struktur folder seperti berikut:
-   cs-rail-monitor/
-   ├── index.html
-   ├── css/
-   │   └── style.css
-   ├── js/
-   │   ├── data-stations.js
-   │   ├── data-trains.js
-   │   └── app.js
-   ├── assets/
-   │   └── images/
-   │       └── stations/
-   │           └── README.txt
-   └── PANDUAN_DAN_SUMBER.txt
+1. Buka folder: assets/images/stations/
+2. Masukkan file foto stasiun berformat .jpg dengan nama sesuai ID stasiun:
+   - gmr.jpg  -> Stasiun Gambir
+   - pse.jpg  -> Stasiun Pasar Senen
+   - smt.jpg  -> Stasiun Semarang Tawang
+   - smc.jpg  -> Stasiun Semarang Poncol
+   - yk.jpg   -> Stasiun Yogyakarta
+   - mdn.jpg  -> Stasiun Medan
+   - tnk.jpg  -> Stasiun Tanjung Karang
+3. Jika foto lokal belum Anda unggah, sistem secara otomatis mengaktifkan fitur
+   fallback darurat sehingga gambar tidak akan rusak atau pecah di layar CS.
 
-2. Inisialisasi Git dan Push:
+
+3. CARA UPLOAD KE GITHUB & MENGAKTIFKAN GITHUB PAGES:
+--------------------------------------------------------------------------------
+1. Inisialisasi Git di dalam folder proyek:
    git init
    git add .
-   git commit -m "Initial commit CS Rail Monitor Jawa-Sumatera"
+   git commit -m "KAI CS Rail Monitor v3.0 Final"
    git branch -M main
-   git remote add origin https://github.com/USERNAME/REPO-NAME.git
+   git remote add origin https://github.com/USERNAME/REPO-ANDA.git
    git push -u origin main
 
-3. Anda bisa mengaktifkan "GitHub Pages" pada menu Settings -> Pages di repositori
-   GitHub agar website ini langsung bisa diakses online oleh tim CS di mana saja!
-
-
-3. CARA KERJA SISTEM DI BROWSER:
---------------------------------------------------------------------------------
-- Aplikasi berjalan murni secara Client-Side (HTML5, Vanilla JS, CSS3).
-- Tidak memerlukan server Node.js, Python, atau database SQL lokal.
-- Cukup buka file "index.html" di browser modern apa pun (Chrome, Edge, Firefox).
+2. Buka repository Anda di browser:
+   Masuk ke menu: Settings -> Pages -> Pada bagian 'Branch', pilih 'main' -> Save.
+3. Website monitoring Anda akan langsung aktif secara online dan dapat diakses
+   kapan saja oleh seluruh petugas Customer Service.
 ================================================================================
