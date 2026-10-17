@@ -1,0 +1,65 @@
+================================================================================
+   DOKUMENTASI SISTEM & PETUNJUK CS RAIL MONITOR (PULAU JAWA & SUMATERA)
+================================================================================
+
+1. CARA PENGGUNAAN PETA OLEH TIM CUSTOMER SERVICE (CS):
+--------------------------------------------------------------------------------
+A. Pembatasan Wilayah Indonesia (Focus Lock):
+   - Peta dikunci pada koordinat Pulau Jawa, Sumatera, dan Bali. Petugas tidak
+     akan tersesat ke luar wilayah Indonesia saat menggeser atau memperkecil peta.
+
+B. Pilihan Mode Tampilan:
+   - "Hanya Jalur Rel (Fokus)": Mode default CS yang menyembunyikan nama jalan/gedung
+     sehingga petugas dapat fokus melihat konektivitas rel, wesel, dan emplasemen.
+   - "Peta Standar": Mengaktifkan kembali kartografi jalan umum OpenStreetMap.
+   - "Citra Satelit": Menampilkan permukaan bumi resolusi tinggi berbasis Esri.
+
+C. Fitur Live Train (Menu Terpilih - Default Nonaktif):
+   - Fitur kereta berjalan TIDAK otomatis menyala untuk menghemat daya & memori.
+   - Untuk mengaktifkan: Klik switch toggle "Pantau Kereta Berjalan" di menu kanan.
+   - Menampilkan animasi mini kartun chibi kereta yang melaju di atas jalurnya.
+   - Terintegrasi dengan jam komputer/server: Kereta hanya muncul saat jam
+     keberangkatan KA tersebut sedang aktif di dunia nyata (Gapeka).
+
+D. Stasiun & Informasi CS:
+   - Klik stasiun mana saja (termasuk Semarang Poncol, Semarang Tawang, Senen, dll.)
+     untuk memunculkan panel kanan berisi review fasilitas, pintu boarding, dan denah.
+   - Tersedia tombol cepat ke "Access by KAI" dan "WhatsApp KAI 121".
+
+
+2. STRUKTUR PROYEK & PANDUAN GITHUB REPOSITORY:
+--------------------------------------------------------------------------------
+Untuk mengunggah proyek ini ke GitHub:
+1. Pastikan struktur folder seperti berikut:
+   cs-rail-monitor/
+   ├── index.html
+   ├── css/
+   │   └── style.css
+   ├── js/
+   │   ├── data-stations.js
+   │   ├── data-trains.js
+   │   └── app.js
+   ├── assets/
+   │   └── images/
+   │       └── stations/
+   │           └── README.txt
+   └── PANDUAN_DAN_SUMBER.txt
+
+2. Inisialisasi Git dan Push:
+   git init
+   git add .
+   git commit -m "Initial commit CS Rail Monitor Jawa-Sumatera"
+   git branch -M main
+   git remote add origin https://github.com/USERNAME/REPO-NAME.git
+   git push -u origin main
+
+3. Anda bisa mengaktifkan "GitHub Pages" pada menu Settings -> Pages di repositori
+   GitHub agar website ini langsung bisa diakses online oleh tim CS di mana saja!
+
+
+3. CARA KERJA SISTEM DI BROWSER:
+--------------------------------------------------------------------------------
+- Aplikasi berjalan murni secara Client-Side (HTML5, Vanilla JS, CSS3).
+- Tidak memerlukan server Node.js, Python, atau database SQL lokal.
+- Cukup buka file "index.html" di browser modern apa pun (Chrome, Edge, Firefox).
+================================================================================
