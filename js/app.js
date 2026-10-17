@@ -1,76 +1,65 @@
-// ==========================================
-// 1. INIT PETA LEAFLET (DIBATASI HANYA JAWA & SUMATERA)
-// ==========================================
-const indonesiaBounds = [
-  [-11.5, 94.5], // Sudut Barat Daya (Selatan Jawa / Barat Sumatera)
-  [6.5, 116.5]   // Sudut Timur Laut (Aceh / Selat Bali)
-];
-
+// ========================================================
+// 1. INISIALISASI PETA LEAFLET (PETA UTUH TANPA POTONGAN)
+// ========================================================
 const map = L.map('map', {
-  center: [-6.9, 109.5],
-  zoom: 7,
-  minZoom: 5,
-  maxZoom: 18,
-  maxBounds: indonesiaBounds,
-  maxBoundsViscosity: 1.0, // Mengunci agar peta tidak keluar wilayah
-  zoomControl: false
+  center: [-4.0, 108.0], // Fokus awal di antara Jawa & Sumatera
+  zoom: 6,
+  minZoom: 3,            // Bebas zoom out penuh
+  maxZoom: 19,           // Zoom mendetail hingga level bantalan rel
+  zoomControl: false     // Pindah ke posisi kanan bawah
 });
 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-// ==========================================
-// 2. LAYER BASEMAP (BEBAS TOKEN API)
-// ==========================================
+// ========================================================
+// 2. LAYER BASEMAP RESMI & BEBAS ERROR TOKEN API
+// ========================================================
 const baseLayers = {
-  // Mode Fokus Rel (Kanvas Polos Abu-abu Esri Tanpa Label Jalan)
+  // Mode Rel Bersih (Fokus Operasional CS - Latar Abu-abu Polos)
   trackonly: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
     maxZoom: 16,
-    bounds: indonesiaBounds,
     attribution: '© Esri Canvas'
   }),
   // Mode Standar (OpenStreetMap)
   osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    bounds: indonesiaBounds,
-    attribution: '© OpenStreetMap'
+    attribution: '© OpenStreetMap contributors'
   }),
-  // Mode Citra Satelit (Esri World Imagery)
+  // Mode Citra Satelit Esri Asli
   satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     maxZoom: 19,
-    bounds: indonesiaBounds,
     attribution: 'Tiles © Esri'
   })
 };
 
-// Layer Jalur Rel Resmi Sedunia (OpenRailwayMap)
+// Layer Detail Rel Kereta Global (OpenRailwayMap)
 const railwayOverlay = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
   maxZoom: 19,
-  bounds: indonesiaBounds,
   attribution: 'Rel © OpenRailwayMap'
 });
 
-// Default Mode: Fokus Jalur Rel
-let activeBaseLayer = baseLayers.trackonly;
-activeBaseLayer.addTo(map);
+// Default Mode: Fokus Rel Bersih + Overlay ORM
+let currentBase = baseLayers.trackonly;
+currentBase.addTo(map);
 railwayOverlay.addTo(map);
 
-function setBaseMap(mode) {
-  map.removeLayer(activeBaseLayer);
-  activeBaseLayer = baseLayers[mode];
-  activeBaseLayer.addTo(map);
+function setBaseMap(modeKey) {
+  map.removeLayer(currentBase);
+  currentBase = baseLayers[modeKey];
+  currentBase.addTo(map);
 
   if (map.hasLayer(railwayOverlay)) {
     railwayOverlay.bringToFront();
   }
 
-  // Update Tampilan Tombol
+  // Update Visual Tombol Aktif
   const btnTrack = document.getElementById('btn-mode-trackonly');
   const checkTrack = document.getElementById('check-trackonly');
-  if (mode === 'trackonly') {
-    btnTrack.className = "w-full mb-2 p-2 rounded-lg border text-left flex items-center justify-between bg-orange-50 border-orange-400 font-bold text-orange-950";
+  if (modeKey === 'trackonly') {
+    btnTrack.className = "w-full mb-2 p-2 rounded-xl border text-left flex items-center justify-between bg-cyan-950/60 border-cyan-500/80 text-cyan-300 font-bold transition";
     checkTrack.classList.remove('hidden');
   } else {
-    btnTrack.className = "w-full mb-2 p-2 rounded-lg border text-left flex items-center justify-between bg-white border-slate-200 text-slate-700 hover:bg-slate-50";
+    btnTrack.className = "w-full mb-2 p-2 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:bg-slate-800 text-left flex items-center justify-between transition";
     checkTrack.classList.add('hidden');
   }
 }
@@ -84,239 +73,186 @@ function toggleRailOverlay(isChecked) {
   }
 }
 
-// ==========================================
-// 3. RENDER STASIUN KE PETA & SIDEBAR
-// ==========================================
-const stationMarkerGroup = L.layerGroup().addTo(map);
-const stationListContainer = document.getElementById('stationListContainer');
+// ========================================================
+// 3. RENDER STASIUN TERSTRUKTUR DAOP 1 - DIVRE IV
+// ========================================================
+const markersLayer = L.layerGroup().addTo(map);
+const listContainer = document.getElementById('stationListContainer');
+let activeMarkerList = [];
 
-function createStationIcon(code) {
+// Desain Pin Marker Stasiun Futuristik
+function createFuturisticPin(code) {
   return L.divIcon({
-    className: 'station-marker',
+    className: 'station-pin',
     html: `
       <div class="flex flex-col items-center cursor-pointer">
-        <div class="w-7 h-7 rounded-full bg-slate-900 border-2 border-orange-500 shadow-md flex items-center justify-center text-white text-[10px] font-bold">
-          <i class="fa-solid fa-train-subway text-orange-400"></i>
+        <div class="w-8 h-8 rounded-xl bg-slate-950/90 border-2 border-cyan-400 shadow-lg shadow-cyan-500/30 flex items-center justify-center text-cyan-300 font-bold text-xs">
+          <i class="fa-solid fa-train"></i>
         </div>
-        <span class="bg-slate-900/90 text-white font-bold text-[9px] px-1.5 py-0.5 rounded shadow mt-0.5 whitespace-nowrap border border-slate-700">
+        <span class="bg-slate-900/95 text-white font-mono font-bold text-[9px] px-2 py-0.5 rounded-md shadow-md mt-1 border border-slate-700 tracking-wider">
           ${code}
         </span>
       </div>
     `,
-    iconSize: [28, 42],
-    iconAnchor: [14, 21]
+    iconSize: [32, 48],
+    iconAnchor: [16, 24]
   });
 }
 
-stationsData.forEach(stn => {
-  // Marker di Peta
-  const marker = L.marker(stn.coords, { icon: createStationIcon(stn.id) });
-  marker.on('click', () => openStationDrawer(stn));
-  marker.addTo(stationMarkerGroup);
+// Fungsi Render Daftar Berkelompok (Grouped by Daop/Divre)
+function renderStationList(filteredData) {
+  listContainer.innerHTML = '';
+  markersLayer.clearLayers();
+  activeMarkerList = [];
 
-  // Card di Sidebar
-  const card = document.createElement('div');
-  card.className = "p-2 bg-white border border-slate-200 rounded-lg shadow-sm hover:border-orange-400 hover:bg-orange-50/60 cursor-pointer transition";
-  card.onclick = () => {
-    map.flyTo(stn.coords, 14, { duration: 1.2 });
-    openStationDrawer(stn);
-  };
-  card.innerHTML = `
-    <div class="flex items-center justify-between">
-      <span class="font-bold text-xs text-slate-800">${stn.name}</span>
-      <span class="text-[9px] text-orange-700 bg-orange-100 font-bold px-1.5 py-0.5 rounded">${stn.id}</span>
-    </div>
-    <p class="text-[10px] text-slate-500">${stn.region} • ${stn.city}</p>
-  `;
-  stationListContainer.appendChild(card);
-});
+  document.getElementById('stationCountDisplay').innerText = `${filteredData.length} Titik`;
 
-// ==========================================
-// 4. ANIMASI MINI CARTOON TRAIN (OPT-IN)
-// ==========================================
-const trainMarkerGroup = L.layerGroup(); // Tidak langsung dimasukkan ke map (Default: Off)
-let trainInstances = [];
-let trainAnimationTimer = null;
-
-// Template SVG Kartun Kereta Lucu Mini
-function createCuteCartoonTrainIcon(train) {
-  return L.divIcon({
-    className: 'mini-train-icon-wrapper',
-    html: `
-      <div class="mini-train-container">
-        <div class="smoke-cloud"></div>
-        <svg viewBox="0 0 40 28" class="mini-train-svg">
-          <!-- Badan Lokomotif Chibi -->
-          <rect x="4" y="6" width="28" height="15" rx="4" fill="#ea580c" stroke="#ffffff" stroke-width="1.5"/>
-          <rect x="22" y="3" width="10" height="7" rx="2" fill="#c2410c"/>
-          <!-- Jendela Kabin -->
-          <circle cx="10" cy="13" r="2.5" fill="#ffffff"/>
-          <circle cx="17" cy="13" r="2.5" fill="#ffffff"/>
-          <rect x="24" y="8" width="6" height="5" rx="1" fill="#bae6fd"/>
-          <!-- Lampu Depan Menyala -->
-          <circle cx="4" cy="15" r="2" fill="#fde047"/>
-          <!-- Roda Kereta Mini -->
-          <circle cx="9" cy="22" r="3" fill="#1e293b" stroke="#ffffff" stroke-width="1"/>
-          <circle cx="19" cy="22" r="3" fill="#1e293b" stroke="#ffffff" stroke-width="1"/>
-          <circle cx="28" cy="22" r="3" fill="#1e293b" stroke="#ffffff" stroke-width="1"/>
-        </svg>
-        <div class="mini-train-label">${train.name}</div>
+  if (filteredData.length === 0) {
+    listContainer.innerHTML = `
+      <div class="p-6 text-center text-slate-500 text-xs">
+        <i class="fa-solid fa-circle-question text-2xl mb-2 text-slate-600 block"></i>
+        Tidak ada stasiun yang cocok dengan filter atau kata kunci.
       </div>
-    `,
-    iconSize: [34, 30],
-    iconAnchor: [17, 15]
+    `;
+    return;
+  }
+
+  // Mengelompokkan stasiun berdasarkan Region (Daop / Divre)
+  const grouped = {};
+  filteredData.forEach(stn => {
+    if (!grouped[stn.region]) grouped[stn.region] = [];
+    grouped[stn.region].push(stn);
+  });
+
+  // Render per grup Daop/Divre
+  Object.keys(grouped).forEach(regionName => {
+    const groupWrapper = document.createElement('div');
+    groupWrapper.className = "space-y-1.5";
+
+    const header = document.createElement('div');
+    header.className = "text-[10px] uppercase font-bold tracking-wider text-cyan-400/90 bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-800/80 flex justify-between items-center";
+    header.innerHTML = `
+      <span><i class="fa-solid fa-building-columns mr-1 text-[9px]"></i> ${regionName}</span>
+      <span class="text-[9px] font-mono bg-slate-800 text-slate-400 px-1.5 py-0.2 rounded">${grouped[regionName].length} Stasiun</span>
+    `;
+    groupWrapper.appendChild(header);
+
+    grouped[regionName].forEach(stn => {
+      // Marker Peta
+      const marker = L.marker(stn.coords, { icon: createFuturisticPin(stn.id) });
+      marker.on('click', () => openDrawer(stn));
+      marker.addTo(markersLayer);
+      activeMarkerList.push({ stn, marker });
+
+      // Kartu Stasiun di Sidebar
+      const card = document.createElement('div');
+      card.className = "p-2.5 bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 hover:border-cyan-500/50 rounded-xl cursor-pointer transition flex items-center justify-between group";
+      card.onclick = () => {
+        map.flyTo(stn.coords, 14, { duration: 1.4 });
+        openDrawer(stn);
+      };
+
+      card.innerHTML = `
+        <div class="truncate mr-2">
+          <div class="font-bold text-xs text-slate-200 group-hover:text-cyan-300 transition truncate">${stn.name}</div>
+          <div class="text-[10px] text-slate-500 mt-0.5 truncate">${stn.city} • <span class="font-mono text-cyan-400/80">${stn.altitude} mdpl</span></div>
+        </div>
+        <div class="w-7 h-7 rounded-lg bg-slate-800 group-hover:bg-cyan-500/20 text-slate-400 group-hover:text-cyan-300 flex items-center justify-center shrink-0 border border-slate-700/60 transition">
+          <i class="fa-solid fa-angle-right text-xs"></i>
+        </div>
+      `;
+      groupWrapper.appendChild(card);
+    });
+
+    listContainer.appendChild(groupWrapper);
   });
 }
 
-// Inisialisasi Armada Kereta
-trainsScheduleData.forEach(train => {
-  const marker = L.marker(train.waypoints[0], { icon: createCuteCartoonTrainIcon(train) });
-  
-  marker.bindPopup(`
-    <div class="p-1 text-xs">
-      <span class="bg-orange-100 text-orange-800 font-bold px-1.5 py-0.5 rounded text-[10px]">${train.id}</span>
-      <h4 class="font-bold text-slate-800 text-sm mt-1">${train.name}</h4>
-      <p class="text-slate-500 text-[11px]">${train.route}</p>
-      <div class="border-t mt-1.5 pt-1 space-y-0.5 text-slate-600">
-        <div>Jadwal: <b>${train.depTime} - ${train.arrTime} WIB</b></div>
-        <div>Tipe: <b>${train.type}</b> (${train.speed})</div>
-      </div>
-    </div>
-  `);
+// Inisialisasi awal render semua stasiun
+renderStationList(stationsData);
 
-  trainInstances.push({
-    train: train,
-    marker: marker,
-    currentStep: 0
-  });
-});
+// ========================================================
+// 4. FILTER WILAYAH & PENCARIAN STASIUN
+// ========================================================
+let currentFilterRegion = "ALL";
+let currentSearchQuery = "";
 
-// Interpolasi koordinat di sepanjang waypoints lintasan rel
-function interpolatePath(waypoints, progress) {
-  const segments = waypoints.length - 1;
-  const scaled = progress * segments;
-  const index = Math.floor(scaled);
-  const frac = scaled - index;
-
-  if (index >= segments) return waypoints[segments];
-
-  const p1 = waypoints[index];
-  const p2 = waypoints[index + 1];
-
-  const lat = p1[0] + (p2[0] - p1[0]) * frac;
-  const lng = p1[1] + (p2[1] - p1[1]) * frac;
-  return [lat, lng];
-}
-
-// Engine Pergerakan Kereta
-function runTrainLoop() {
-  const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-  // Update display jam di panel kontrol
-  const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB";
-  document.getElementById('clockDisplay').innerText = timeStr;
-
-  const onlyActive = document.getElementById('onlyActiveHoursCheckbox').checked;
-  let activeCount = 0;
-
-  trainInstances.forEach(item => {
-    const isRunning = isTrainCurrentlyRunning(item.train, currentMinutes);
-    
-    if (isRunning) {
-      activeCount++;
-      // Hitung posisi proporsional tepat berdasarkan jam sekarang
-      const progress = calculateTrainProgress(item.train, currentMinutes);
-      const coord = interpolatePath(item.train.waypoints, progress);
-      item.marker.setLatLng(coord);
-
-      if (!trainMarkerGroup.hasLayer(item.marker)) {
-        trainMarkerGroup.addLayer(item.marker);
-      }
-    } else {
-      if (onlyActive) {
-        if (trainMarkerGroup.hasLayer(item.marker)) {
-          trainMarkerGroup.removeLayer(item.marker);
-        }
-      } else {
-        // Jika opsi "Hanya KA Jam Ini" dimatikan, tampilkan kereta berpatroli simulasi
-        item.currentStep = (item.currentStep + 0.002) % 1.0;
-        const coord = interpolatePath(item.train.waypoints, item.currentStep);
-        item.marker.setLatLng(coord);
-        if (!trainMarkerGroup.hasLayer(item.marker)) {
-          trainMarkerGroup.addLayer(item.marker);
-        }
-      }
-    }
+function applyCombinedFilters() {
+  const filtered = stationsData.filter(stn => {
+    const matchRegion = (currentFilterRegion === "ALL") || (stn.region === currentFilterRegion);
+    const q = currentSearchQuery.toLowerCase();
+    const matchSearch = stn.name.toLowerCase().includes(q) ||
+                        stn.id.toLowerCase().includes(q) ||
+                        stn.city.toLowerCase().includes(q) ||
+                        stn.region.toLowerCase().includes(q);
+    return matchRegion && matchSearch;
   });
 
-  document.getElementById('trainStatusIndicator').innerText = `${activeCount} KA Sedang Berjalan`;
-}
+  renderStationList(filtered);
 
-// Kontrol Toggle Live Train Menu
-function toggleLiveTrainMenu(isTurnedOn) {
-  const panel = document.getElementById('trainFilterPanel');
-  if (isTurnedOn) {
-    panel.classList.remove('hidden');
-    map.addLayer(trainMarkerGroup);
-    runTrainLoop();
-    trainAnimationTimer = setInterval(runTrainLoop, 1500);
-  } else {
-    panel.classList.add('hidden');
-    map.removeLayer(trainMarkerGroup);
-    if (trainAnimationTimer) clearInterval(trainAnimationTimer);
+  // Jika hasil filter hanya 1 stasiun (misal pencarian spesifik), langsung arahkan kamera
+  if (filtered.length === 1) {
+    map.flyTo(filtered[0].coords, 13, { duration: 1.2 });
   }
 }
 
-function updateTrainVisibility() {
-  runTrainLoop();
+function handleRegionFilter(regionValue) {
+  currentFilterRegion = regionValue;
+  applyCombinedFilters();
+
+  // Otomatis arahkan pandangan kamera ke stasiun pertama di Daop tersebut
+  if (regionValue !== "ALL") {
+    const firstInRegion = stationsData.find(s => s.region === regionValue);
+    if (firstInRegion) {
+      map.flyTo(firstInRegion.coords, 10, { duration: 1.5 });
+    }
+  }
 }
 
-// ==========================================
-// 5. DRAWER DETAIL STASIUN
-// ==========================================
-function openStationDrawer(stn) {
+function handleSearch(query) {
+  currentSearchQuery = query;
+  const clearBtn = document.getElementById('clearSearchBtn');
+  if (query.length > 0) {
+    clearBtn.classList.remove('hidden');
+  } else {
+    clearBtn.classList.add('hidden');
+  }
+  applyCombinedFilters();
+}
+
+function clearSearch() {
+  const searchInput = document.getElementById('stationSearch');
+  searchInput.value = '';
+  handleSearch('');
+}
+
+// ========================================================
+// 5. DRAWER DETAIL & REVIEW STASIUN
+// ========================================================
+function openDrawer(stn) {
   document.getElementById('drawerBadge').innerText = stn.region;
   document.getElementById('drawerTitle').innerText = stn.name;
   document.getElementById('drawerCity').innerText = `${stn.city} • ${stn.region}`;
+  document.getElementById('drawerAltitude').innerText = `Ketinggian: ${stn.altitude} mdpl`;
   document.getElementById('drawerImage').src = stn.image;
-  document.getElementById('drawerImagePath').innerText = stn.image;
+  document.getElementById('drawerFileRef').innerText = stn.image;
   document.getElementById('drawerReview').innerText = stn.review;
   document.getElementById('drawerLayoutGuide').innerText = stn.layoutGuide;
   document.getElementById('drawerLayoutLink').href = `https://www.google.com/maps/search/?api=1&query=${stn.mapsQuery}`;
 
+  // Fasilitas
   const facContainer = document.getElementById('drawerFacilities');
   facContainer.innerHTML = '';
   stn.facilities.forEach(fac => {
-    const item = document.createElement('div');
-    item.className = "p-1.5 bg-slate-50 border border-slate-200 rounded text-slate-700 flex items-center gap-1.5";
-    item.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 text-[10px]"></i> <span class="text-[11px]">${fac}</span>`;
-    facContainer.appendChild(item);
+    const badge = document.createElement('div');
+    badge.className = "p-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-300 flex items-center gap-2";
+    badge.innerHTML = `<i class="fa-solid fa-circle-check text-cyan-400 text-xs shrink-0"></i> <span class="text-[11px] leading-tight">${fac}</span>`;
+    facContainer.appendChild(badge);
   });
 
   document.getElementById('stationDrawer').classList.add('drawer-open');
 }
 
-function closeStationDrawer() {
+function closeDrawer() {
   document.getElementById('stationDrawer').classList.remove('drawer-open');
-}
-
-function flyToRegion(coords, zoom) {
-  closeStationDrawer();
-  map.flyTo(coords, zoom, { duration: 1.3 });
-}
-
-// Pencarian Stasiun di Sidebar
-function handleStationSearch(val) {
-  const q = val.toLowerCase();
-  stationsData.forEach((stn, index) => {
-    const isMatch = stn.name.toLowerCase().includes(q) || 
-                    stn.city.toLowerCase().includes(q) || 
-                    stn.region.toLowerCase().includes(q) ||
-                    stn.id.toLowerCase().includes(q);
-
-    if (stationListContainer.children[index + 1]) {
-      stationListContainer.children[index + 1].style.display = isMatch ? 'block' : 'none';
-    }
-  });
 }
