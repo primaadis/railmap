@@ -1,67 +1,61 @@
 ================================================================================
-   DOKUMENTASI KAI CS RAIL COMMAND CENTER - JAWA & SUMATERA (V3.0 FINAL)
+   DOKUMENTASI KAI GIS CS & HERITAGE EXPLORER (V4.0 CINEMATIC & RESPONSIVE)
 ================================================================================
 
-1. LOGIKA NAVIGASI & PENGGUNAAN PETA OLEH CS:
+1. LOGIKA INTERAKSI & DUKUNGAN MOBILE (RESPONSIVE 60 FPS):
 --------------------------------------------------------------------------------
-A. Peta Bebas & Utuh (Full Global Support):
-   - Pembatasan ketat koordinat (maxBounds) telah dihilangkan. Peta dapat digeser
-     dan di-zoom secara mulus tanpa batas kaku.
-   - Peta default tetap difokuskan langsung ke gugusan rel Pulau Jawa & Sumatera.
+A. Navigasi Mobile-First (HP & Tablet):
+   - Dilengkapi Mobile Bottom Sheet: Saat stasiun diklik di HP, lembar detail
+     meluncur mulus dari bawah (slide-up) dengan drag-handle khas aplikasi peta
+     modern (Apple Maps / Google Maps) tanpa merusak tampilan peta utama.
+   - Bilah Filter Horizontal (Slide-Nav): Tombol filter kategori dapat digeser
+     secara horizontal dengan sentuhan jari (smooth touch swipe 60 FPS).
+   - Sidebar slide-over dengan tombol "Katalog" di bagian atas untuk layar kecil.
 
-B. Tampilan Kartografi Command Center:
-   - "Fokus Rel Bersih": Mode default operasional CS. Latar belakang disederhanakan
-     (kanvas abu-abu polos tanpa nama jalan raya) sehingga visualisasi wesel,
-     jalur ganda, dan titik stasiun terlihat sangat jelas dan kontras.
-   - "Peta Standar": Menampilkan kartografi jalan umum OpenStreetMap jika CS
-     perlu memandu akses jalan penumpang ke arah stasiun.
-   - "Citra Satelit": Menampilkan foto satelit bumi Esri resolusi tinggi secara legal
-     dan tanpa pesan error token API.
-   - "Overlay Detail Rel (ORM)": Menampilkan data teknis OpenRailwayMap (wesel,
-     jalur langsiran, dan percabangan).
-
-C. Filter Terstruktur Daop 1 s.d. Divre IV:
-   - Stasiun di sidebar dikelompokkan dan diurutkan secara tertib dari barat ke
-     timur (Daop 1 Jakarta hingga Daop 9 Jember), dilanjutkan dengan Divre I Medan
-     hingga Divre IV Tanjungkarang.
-   - CS dapat memilih Daop/Divre spesifik melalui menu dropdown, atau mengetik
-     langsung nama stasiun (misal: "Poncol", "Tawang", "Lempuyangan", "Medan").
-
-D. Drawer Informasi & Layanan Penumpang:
-   - Klik stasiun mana saja untuk membuka drawer sisi kanan.
-   - Menyajikan data elevasi ketinggian (mdpl), ulasan CS mengenai karakteristik
-     stasiun, checklist fasilitas, dan panduan alur gerbang boarding.
-   - Tersedia tautan langsung ke portal tiket Access by KAI (`booking.kai.id`)
-     dan kontak resmi WhatsApp KAI 121 (`0811-1211-1121`).
+B. Klasifikasi Kategori & Perbedaan Warna Pin Stasiun:
+   1. Merah Crimson (Whoosh):
+      Stasiun Kereta Cepat Jakarta-Bandung (Halim, Padalarang, Tegalluar).
+   2. Kuning/Amber (Bandara & Feeder):
+      Stasiun terintegrasi bandara (YIA, Kualanamu Railink, Feeder Cimahi).
+   3. Cyan Neon (KRL / Lokal):
+      Pusat KAI Commuter Jabodetabek & Solo-Jogja (Manggarai, Bogor, Tanah Abang).
+   4. Biru Safir (KA Antarkota):
+      Pemberhentian utama KA Jarak Jauh Daop 1 Jakarta s.d. Divre IV Lampung.
+   5. Bronze/Stone Kuno (Jalur Non-Aktif / Sejarah):
+      Stasiun cagar budaya dan jalur mati legendaris (Museum Ambarawa, Bedono rel
+      gigi, Cikajang eks stasiun tertinggi +1.246 mdpl, Pangandaran lintas
+      terowongan Wilhelmina, Kudus jalur trem uap SJS, Bukittinggi Lembah Anai).
+      Lengkap dengan narasi sejarah kolonial dan elevasi mdpl.
 
 
-2. CARA MENGGANTI FOTO STASIUN DI REPOSITORY GITHUB:
+2. CARA MENGGANTI FOTO STASIUN DI GITHUB:
 --------------------------------------------------------------------------------
-1. Buka folder: assets/images/stations/
-2. Masukkan file foto stasiun berformat .jpg dengan nama sesuai ID stasiun:
-   - gmr.jpg  -> Stasiun Gambir
-   - pse.jpg  -> Stasiun Pasar Senen
-   - smt.jpg  -> Stasiun Semarang Tawang
-   - smc.jpg  -> Stasiun Semarang Poncol
-   - yk.jpg   -> Stasiun Yogyakarta
-   - mdn.jpg  -> Stasiun Medan
-   - tnk.jpg  -> Stasiun Tanjung Karang
-3. Jika foto lokal belum Anda unggah, sistem secara otomatis mengaktifkan fitur
-   fallback darurat sehingga gambar tidak akan rusak atau pecah di layar CS.
+Letakkan foto pada folder: assets/images/stations/ dengan nama ID stasiun:
+- hlm.jpg  -> Stasiun Halim Whoosh
+- abr.jpg  -> Museum Ambarawa
+- ckg.jpg  -> Eks Stasiun Cikajang
+- bdn.jpg  -> Stasiun Bedono
+- pnd.jpg  -> Eks Stasiun Pangandaran
+- yia.jpg  -> Stasiun Bandara YIA
+- mri.jpg  -> Stasiun Manggarai
+- smc.jpg  -> Stasiun Semarang Poncol
+- smt.jpg  -> Stasiun Semarang Tawang
+
+* Sistem memiliki mekanisme fail-safe: jika foto lokal belum diunggah, gambar
+  otomatis beralih ke cadangan resolusi tinggi dari Unsplash tanpa error.
 
 
-3. CARA UPLOAD KE GITHUB & MENGAKTIFKAN GITHUB PAGES:
+3. CARA UPLOAD KE GITHUB & HOSTING ONLINE (GITHUB PAGES):
 --------------------------------------------------------------------------------
-1. Inisialisasi Git di dalam folder proyek:
+1. Buka terminal di folder proyek:
    git init
    git add .
-   git commit -m "KAI CS Rail Monitor v3.0 Final"
+   git commit -m "KAI CS GIS Explorer v4.0 Cinematic Mobile-Ready"
    git branch -M main
-   git remote add origin https://github.com/USERNAME/REPO-ANDA.git
+   git remote add origin https://github.com/USERNAME/NAMA-REPO.git
    git push -u origin main
 
-2. Buka repository Anda di browser:
-   Masuk ke menu: Settings -> Pages -> Pada bagian 'Branch', pilih 'main' -> Save.
-3. Website monitoring Anda akan langsung aktif secara online dan dapat diakses
-   kapan saja oleh seluruh petugas Customer Service.
+2. Masuk ke Settings repository di GitHub:
+   Menu: Pages -> Source: Deploy from a branch -> Branch: main -> Save.
+3. Website langsung aktif dan dapat diakses dari HP seluruh tim Customer Service.
 ================================================================================
