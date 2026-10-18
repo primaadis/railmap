@@ -4,9 +4,8 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Kanvas gelap bersih murni untuk visualisasi jalur kereta api */
 #map {
-  background-color: #060911 !important;
+  background-color: #0b0f19 !important;
   width: 100%;
   height: 100%;
 }
@@ -19,7 +18,7 @@ body {
 
 @media (min-width: 768px) {
   body.drawer-is-open #rightControlsBar {
-    right: 424px;
+    right: 456px; /* Menjaga jarak pas di samping drawer desktop (440px + 16px) */
   }
 }
 
@@ -56,8 +55,8 @@ body {
 
 .category-pill {
   flex-shrink: 0;
-  padding: 4px 11px;
-  font-size: 10.5px;
+  padding: 5px 13px;
+  font-size: 11px;
   font-weight: 600;
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -66,6 +65,13 @@ body {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .category-pill {
+    font-size: 12px;
+    padding: 5px 14px;
+  }
 }
 
 .category-pill:hover {
@@ -82,7 +88,7 @@ body {
 
 /* Custom Minimal Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 3px;
+  width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
@@ -112,6 +118,16 @@ body {
   transform: scale(1.35) translateY(-3px);
   z-index: 1000 !important;
   box-shadow: 0 0 18px rgba(245, 158, 11, 0.9);
+}
+
+/* Polyline Jalur Rel Animasi Halus */
+.railway-route-line {
+  transition: stroke-width 0.2s ease, stroke-opacity 0.2s ease;
+}
+.railway-route-line:hover {
+  stroke-width: 7 !important;
+  stroke-opacity: 1 !important;
+  cursor: pointer;
 }
 
 /* Leaflet Zoom Control Styling */
