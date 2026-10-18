@@ -1,6 +1,6 @@
 /**
  * KAI GIS CS & HERITAGE EXPLORER CONTROLLER
- * Versi 4.5 - Dual-Theme Mode (Siang & Malam), Route Polylines & High-Legibility Typography
+ * Versi 5.1 - Integrated Tools, Clean Zen Mode, Route Calculation & SVG Elevation
  */
 
 let map;
@@ -9,24 +9,45 @@ let railwayOverlayLayer = null;
 let currentBasemapType = 'canvas-theme';
 let stationMarkers = [];
 let routeLayers = {};
+let landmarkMarkers = [];
 let activeStationId = null;
 let currentCategory = 'all';
 let currentRegion = 'ALL';
 let searchQuery = '';
+let activeHighlightedPolyline = null;
+let isCleanFocusMode = false;
 
-// Pengaturan Tema Default / Mengambil dari Penyimpanan Lokal
+// Cache memory cuaca agar tidak berulang kali memanggil network di HP
+const weatherCache = {};
+
+// Pengaturan Tema
 let currentTheme = localStorage.getItem('kai_gis_theme') || 'dark';
 
-// Warna Pin Stasiun
+const INTERMODAL_CONFIG = {
+  lrt: { label: "LRT", icon: "fa-train-subway", color: "bg-red-500/20 text-red-400 border-red-500/30" },
+  mrt: { label: "MRT", icon: "fa-train-subway", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
+  brt: { label: "Transjakarta / BRT", icon: "fa-bus", color: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
+  bus: { label: "Terminal Bus / Teman Bus", icon: "fa-bus-simple", color: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30" },
+  krl: { label: "KRL Commuter", icon: "fa-train-subway", color: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" },
+  ferry: { label: "Pelabuhan Feri ASDP", icon: "fa-ship", color: "bg-teal-500/20 text-teal-400 border-teal-500/30" },
+  feeder: { label: "KA Feeder KCJB", icon: "fa-bolt", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
+  shuttle: { label: "Shuttle Kawasan", icon: "fa-van-shuttle", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" },
+  "airport-rail": { label: "KA Bandara", icon: "fa-plane-departure", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+  "airport-plane": { label: "Bandara Internasional", icon: "fa-plane", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+  angkot: { label: "Angkot / Mikrotrans", icon: "fa-car-side", color: "bg-slate-500/20 text-slate-300 border-slate-500/30" },
+  "heritage-tour": { label: "KA Wisata Uap", icon: "fa-train", color: "bg-stone-500/20 text-stone-300 border-stone-500/30" },
+  "historical-site": { label: "Situs Sejarah", icon: "fa-monument", color: "bg-amber-800/20 text-amber-300 border-amber-800/30" }
+};
+
 const PIN_COLORS = {
-  whoosh: '#dc2626',            // Merah Whoosh
-  antarkota: '#2563eb',         // Biru KA Antarkota
-  'krl-jabodetabek': '#06b6d4',  // Cyan KRL Jabodetabek
-  'krl-jogja': '#10b981',        // Emerald KRL Jogja-Solo
-  'lokal-kci': '#f59e0b',        // Amber Lokal KCI
-  'lokal-kai': '#a855f7',        // Ungu Lokal KAI
-  bandara: '#d97706',           // Oranye Bandara
-  heritage: '#854d0e'           // Cokelat Heritage
+  whoosh: '#dc2626',
+  antarkota: '#2563eb',
+  'krl-jabodetabek': '#06b6d4',
+  'krl-jogja': '#10b981',
+  'lokal-kci': '#f59e0b',
+  'lokal-kai': '#a855f7',
+  bandara: '#d97706',
+  heritage: '#854d0e'
 };
 
 const PIN_ICONS = {
@@ -41,47 +62,29 @@ const PIN_ICONS = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Terapkan tema awal
   applyTheme(currentTheme, false);
-
   initMap();
   initRailwayRoutes();
+  initCivilLandmarks();
+  initRouteFinderOptions();
   renderStationDirectory();
   updateStationMarkers();
 
-  // Cegah interaksi dropdown dan drawer tembus ke peta Leaflet
-  const rightControls = document.getElementById('rightControlsBar');
-  if (rightControls) {
-    L.DomEvent.disableClickPropagation(rightControls);
-    L.DomEvent.disableScrollPropagation(rightControls);
-  }
+  ['rightControlsBar', 'stationDrawer', 'toolsMenuDropdown', 'layerMenuDropdown'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      L.DomEvent.disableClickPropagation(el);
+      L.DomEvent.disableScrollPropagation(el);
+    }
+  });
 
-  const drawer = document.getElementById('stationDrawer');
-  if (drawer) {
-    L.DomEvent.disableClickPropagation(drawer);
-    L.DomEvent.disableScrollPropagation(drawer);
-  }
-
-  const routeDropdown = document.getElementById('routeMenuDropdown');
-  if (routeDropdown) {
-    L.DomEvent.disableClickPropagation(routeDropdown);
-    L.DomEvent.disableScrollPropagation(routeDropdown);
-  }
-
-  const layerDropdown = document.getElementById('layerMenuDropdown');
-  if (layerDropdown) {
-    L.DomEvent.disableClickPropagation(layerDropdown);
-    L.DomEvent.disableScrollPropagation(layerDropdown);
-  }
-
-  // Pada PC (Layar Lebar), tampilkan stasiun pertama secara otomatis
   if (window.innerWidth >= 1024 && typeof STATIONS_DATA !== 'undefined' && STATIONS_DATA.length > 0) {
     selectStation(STATIONS_DATA[0].id, false);
   }
 });
 
 // ========================================================
-// SISTEM MODE SIANG / MALAM (THEME SWITCHER)
+// SISTEM TEMA DUAL-MODE
 // ========================================================
 function toggleTheme() {
   const newTheme = (currentTheme === 'dark') ? 'light' : 'dark';
@@ -94,38 +97,31 @@ function applyTheme(theme, updateBasemap = true) {
 
   const body = document.getElementById('appBody');
   const themeIcon = document.getElementById('themeIcon');
-  const themeLabel = document.getElementById('themeLabel');
   const themeIconMobile = document.getElementById('themeIconMobile');
   const canvasDesc = document.getElementById('canvasThemeDesc');
 
   if (theme === 'light') {
     body.classList.remove('theme-dark');
     body.classList.add('theme-light');
-
     if (themeIcon) themeIcon.className = 'fa-solid fa-moon text-indigo-600';
-    if (themeLabel) themeLabel.innerText = 'Mode Malam';
     if (themeIconMobile) themeIconMobile.className = 'fa-solid fa-moon text-indigo-600';
     if (canvasDesc) canvasDesc.innerText = 'Esri Light Canvas (Mode Siang Terang)';
   } else {
     body.classList.remove('theme-light');
     body.classList.add('theme-dark');
-
     if (themeIcon) themeIcon.className = 'fa-solid fa-sun text-amber-500';
-    if (themeLabel) themeLabel.innerText = 'Mode Siang';
     if (themeIconMobile) themeIconMobile.className = 'fa-solid fa-sun text-amber-500';
     if (canvasDesc) canvasDesc.innerText = 'Esri Dark Canvas (Mode Malam Gelap)';
   }
 
-  // Jika basemap saat ini adalah jenis kanvas tema, perbarui lapisannya
   if (updateBasemap && map && currentBasemapType === 'canvas-theme') {
     setBaseMap('canvas-theme');
   }
 
-  // Render ulang direktori stasiun agar kartu mendapat gaya kelas tema yang tepat
   renderStationDirectory();
 }
 
-// Inisialisasi Peta Leaflet
+// Inisialisasi Peta
 function initMap() {
   map = L.map('map', {
     zoomControl: false,
@@ -139,7 +135,6 @@ function initMap() {
     prefix: '<span class="text-[10px] opacity-75">KAI GIS • OpenRailwayMap Live</span>'
   }).addTo(map);
 
-  // Layer Rel OpenRailwayMap Standar
   railwayOverlayLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
     maxZoom: 19,
     subdomains: ['a', 'b', 'c'],
@@ -147,16 +142,15 @@ function initMap() {
   });
   railwayOverlayLayer.addTo(map);
 
-  // Pasang basemap awal sesuai tema aktif
   setBaseMap('canvas-theme');
 
   map.on('click', () => {
     closeLayerMenu();
-    closeRouteMenu();
+    closeToolsMenu();
   });
 }
 
-// Polylines Jalur KA Interaktif
+// Inisialisasi Polylines Jalur
 function initRailwayRoutes() {
   if (typeof RAILWAY_ROUTES === 'undefined') return;
 
@@ -170,13 +164,13 @@ function initRailwayRoutes() {
       className: 'railway-route-line'
     });
 
-    polyline.bindTooltip(`<b>${route.name}</b>`, {
+    polyline.bindTooltip(`<b>${route.name}</b><br><span style="font-size:10px; opacity:0.8;">Klik untuk profil elevasi</span>`, {
       sticky: true,
       className: 'bg-slate-900 text-white rounded-lg px-2.5 py-1 text-xs border border-white/10 shadow-xl'
     });
 
     polyline.on('click', () => {
-      map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+      openElevationWidget(key);
     });
 
     polyline.addTo(map);
@@ -184,29 +178,94 @@ function initRailwayRoutes() {
   });
 }
 
-// Toggle Jalur Rel
-function toggleRouteLayer(key, isChecked) {
-  if (!routeLayers[key]) return;
-  if (isChecked) {
-    if (!map.hasLayer(routeLayers[key])) {
-      map.addLayer(routeLayers[key]);
+// Inisialisasi Landmark Terowongan & Jembatan
+function initCivilLandmarks() {
+  if (typeof CIVIL_LANDMARKS === 'undefined') return;
+
+  CIVIL_LANDMARKS.forEach(lm => {
+    const icon = L.divIcon({
+      className: 'landmark-marker-pin',
+      html: `
+        <div class="landmark-marker-icon" style="background: ${lm.color}; width: 24px; height: 24px; border: 2px solid #ffffff;">
+          <i class="fa-solid ${lm.icon} text-[10px]"></i>
+        </div>
+      `,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
+    });
+
+    const marker = L.marker([lm.lat, lm.lng], { icon: icon });
+    marker.landmarkType = lm.type;
+
+    marker.bindTooltip(`
+      <b style="color:${lm.color};">${lm.name}</b> (${lm.length})<br>
+      <span style="font-size:10px; opacity:0.8;">${lm.location} • Tahun: ${lm.year}</span><br>
+      <p style="font-size:10px; margin-top:3px; max-width:200px; line-height:1.3;">${lm.desc}</p>
+    `, {
+      direction: 'top',
+      offset: [0, -12],
+      className: 'bg-slate-900 text-white rounded-xl p-2.5 border border-white/10 text-xs shadow-2xl'
+    });
+
+    marker.addTo(map);
+    landmarkMarkers.push(marker);
+  });
+}
+
+function toggleLandmarkCategory(type, isChecked) {
+  landmarkMarkers.forEach(m => {
+    if (m.landmarkType === type) {
+      if (isChecked) {
+        if (!map.hasLayer(m)) map.addLayer(m);
+      } else {
+        if (map.hasLayer(m)) map.removeLayer(m);
+      }
+    }
+  });
+}
+
+// ========================================================
+// MODE TAMPILAN BERSIH (ZEN CLEAN FOCUS MODE)
+// ========================================================
+function toggleCleanFocusMode() {
+  isCleanFocusMode = !isCleanFocusMode;
+  const btn = document.getElementById('cleanModeBtn');
+
+  if (isCleanFocusMode) {
+    // Sembunyikan seluruh garis rute dan landmark
+    toggleAllRoutes(false);
+    toggleLandmarkCategory('tunnel', false);
+    toggleLandmarkCategory('bridge', false);
+    closeElevationWidget();
+
+    const tChk = document.getElementById('tunnelOverlayToggle');
+    const bChk = document.getElementById('bridgeOverlayToggle');
+    if (tChk) tChk.checked = false;
+    if (bChk) bChk.checked = false;
+
+    if (btn) {
+      btn.innerText = 'Matikan';
+      btn.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-600 text-white transition';
     }
   } else {
-    if (map.hasLayer(routeLayers[key])) {
-      map.removeLayer(routeLayers[key]);
+    // Kembalikan ke tampilan normal
+    toggleAllRoutes(true);
+    toggleLandmarkCategory('tunnel', true);
+    toggleLandmarkCategory('bridge', true);
+
+    const tChk = document.getElementById('tunnelOverlayToggle');
+    const bChk = document.getElementById('bridgeOverlayToggle');
+    if (tChk) tChk.checked = true;
+    if (bChk) bChk.checked = true;
+
+    if (btn) {
+      btn.innerText = 'Aktifkan';
+      btn.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white transition';
     }
   }
 }
 
-function toggleAllRoutes(forceState) {
-  Object.keys(routeLayers).forEach(key => {
-    const checkbox = document.getElementById(`route-${key}`);
-    if (checkbox) checkbox.checked = forceState;
-    toggleRouteLayer(key, forceState);
-  });
-}
-
-// Basemap Switcher (Mendukung Kanvas Siang & Kanvas Malam)
+// Basemap Switcher
 function setBaseMap(type) {
   currentBasemapType = type;
 
@@ -215,7 +274,6 @@ function setBaseMap(type) {
     currentBaseLayer = null;
   }
 
-  // Reset kelas tombol basemap
   ['canvas-theme', 'osm', 'satellite'].forEach(id => {
     const btn = document.getElementById(`btn-${id}`);
     const chk = document.getElementById(`check-${id}`);
@@ -227,7 +285,6 @@ function setBaseMap(type) {
   });
 
   if (type === 'canvas-theme') {
-    // Mode Kanvas Bersih: Di Mode Malam memakai Dark Gray, di Mode Siang memakai Light Gray
     const esriUrl = (currentTheme === 'light')
       ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
       : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
@@ -256,14 +313,11 @@ function setBaseMap(type) {
     if (btn) btn.classList.add('app-basemap-active');
   }
 
-  // Pastikan overlay rel dan rute berada di depan basemap
   if (railwayOverlayLayer && map.hasLayer(railwayOverlayLayer)) {
     railwayOverlayLayer.bringToFront();
   }
   Object.keys(routeLayers).forEach(key => {
-    if (map.hasLayer(routeLayers[key])) {
-      routeLayers[key].bringToFront();
-    }
+    if (map.hasLayer(routeLayers[key])) routeLayers[key].bringToFront();
   });
 }
 
@@ -274,39 +328,33 @@ function toggleRailOverlay(checked) {
       railwayOverlayLayer.bringToFront();
     }
   } else {
-    if (map.hasLayer(railwayOverlayLayer)) {
-      map.removeLayer(railwayOverlayLayer);
-    }
+    if (map.hasLayer(railwayOverlayLayer)) map.removeLayer(railwayOverlayLayer);
   }
 }
 
-// Kontrol Dropdown
-function toggleRouteMenu(event) {
+// Kontrol Dropdown Menus
+function toggleToolsMenu(event) {
   if (event) event.stopPropagation();
   closeLayerMenu();
-  const menu = document.getElementById('routeMenuDropdown');
+  const menu = document.getElementById('toolsMenuDropdown');
   if (menu) menu.classList.toggle('hidden');
 }
 
-function closeRouteMenu() {
-  const menu = document.getElementById('routeMenuDropdown');
-  if (menu && !menu.classList.contains('hidden')) {
-    menu.classList.add('hidden');
-  }
+function closeToolsMenu() {
+  const menu = document.getElementById('toolsMenuDropdown');
+  if (menu && !menu.classList.contains('hidden')) menu.classList.add('hidden');
 }
 
 function toggleLayerMenu(event) {
   if (event) event.stopPropagation();
-  closeRouteMenu();
+  closeToolsMenu();
   const menu = document.getElementById('layerMenuDropdown');
   if (menu) menu.classList.toggle('hidden');
 }
 
 function closeLayerMenu() {
   const menu = document.getElementById('layerMenuDropdown');
-  if (menu && !menu.classList.contains('hidden')) {
-    menu.classList.add('hidden');
-  }
+  if (menu && !menu.classList.contains('hidden')) menu.classList.add('hidden');
 }
 
 function resetMapView() {
@@ -314,7 +362,559 @@ function resetMapView() {
   map.flyTo([-7.25, 110.15], 7, { duration: 1.0 });
 }
 
-// Filter Data
+function toggleRouteLayer(key, isChecked) {
+  if (!routeLayers[key]) return;
+  if (isChecked) {
+    if (!map.hasLayer(routeLayers[key])) map.addLayer(routeLayers[key]);
+  } else {
+    if (map.hasLayer(routeLayers[key])) map.removeLayer(routeLayers[key]);
+  }
+}
+
+function toggleAllRoutes(forceState) {
+  Object.keys(routeLayers).forEach(key => {
+    const checkbox = document.getElementById(`route-${key}`);
+    if (checkbox) checkbox.checked = forceState;
+    toggleRouteLayer(key, forceState);
+  });
+}
+
+// ========================================================
+// RUTE & TRANSIT FINDER
+// ========================================================
+function initRouteFinderOptions() {
+  const originSel = document.getElementById('routeOriginSelect');
+  const destSel = document.getElementById('routeDestSelect');
+  if (!originSel || !destSel || typeof STATIONS_DATA === 'undefined') return;
+
+  originSel.innerHTML = '';
+  destSel.innerHTML = '';
+
+  const activeStations = STATIONS_DATA.filter(s => !s.status.includes('Non-Aktif'));
+
+  activeStations.forEach(s => {
+    originSel.add(new Option(`${s.name} (${s.code}) - ${s.city}`, s.id));
+    destSel.add(new Option(`${s.name} (${s.code}) - ${s.city}`, s.id));
+  });
+
+  originSel.value = "gmr";
+  destSel.value = "sbi";
+}
+
+function toggleRouteFinderModal() {
+  const modal = document.getElementById('routeFinderModal');
+  modal.classList.toggle('hidden');
+}
+
+function calculateSelectedRoute() {
+  const originId = document.getElementById('routeOriginSelect').value;
+  const destId = document.getElementById('routeDestSelect').value;
+
+  if (originId === destId) {
+    alert("Silahkan pilih stasiun asal dan tujuan yang berbeda.");
+    return;
+  }
+
+  const sOrigin = STATIONS_DATA.find(s => s.id === originId);
+  const sDest = STATIONS_DATA.find(s => s.id === destId);
+  if (!sOrigin || !sDest) return;
+
+  const resultBox = document.getElementById('routeResultBox');
+  resultBox.classList.remove('hidden');
+
+  document.getElementById('resultRouteTitle').innerText = `${sOrigin.name} ➔ ${sDest.name}`;
+
+  const distKm = Math.round(calcDistanceKm(sOrigin.lat, sOrigin.lng, sDest.lat, sDest.lng) * 1.25);
+  document.getElementById('resultDistance').innerText = `± ${distKm} km`;
+
+  let speedKmH = 80;
+  if (sOrigin.category === 'whoosh' && sDest.category === 'whoosh') speedKmH = 250;
+  else if (sOrigin.category.includes('krl') && sDest.category.includes('krl')) speedKmH = 45;
+
+  const hours = Math.floor(distKm / speedKmH);
+  const mins = Math.round(((distKm / speedKmH) - hours) * 60);
+  document.getElementById('resultDuration').innerText = `~ ${hours > 0 ? hours + ' Jam ' : ''}${mins} Menit`;
+
+  let transitInfo = "Langsung (Tanpa Transit)";
+  if (sOrigin.category === 'krl-jabodetabek' && sDest.category === 'krl-jogja') {
+    transitInfo = "Transit di Pasar Senen / Gambir (Menyambung KA Antarkota)";
+  } else if (sOrigin.category === 'whoosh' && sDest.category !== 'whoosh') {
+    transitInfo = "Transit di Stasiun Padalarang (Menyambung KA Feeder KCJB)";
+  } else if (sOrigin.region !== sDest.region && !sOrigin.category.includes('antarkota')) {
+    transitInfo = "Transit di Stasiun Sentral Manggarai";
+  }
+  document.getElementById('resultTransit').innerText = transitInfo;
+
+  const trainBadges = document.getElementById('resultTrainBadges');
+  trainBadges.innerHTML = '';
+  let trains = ["KA Jarak Jauh Reguler", "Access by KAI"];
+  if (sOrigin.category === 'whoosh' || sDest.category === 'whoosh') {
+    trains = ["KCIC Whoosh G1200", "KA Feeder Padalarang"];
+  } else if (sOrigin.category === 'krl-jabodetabek' || sDest.category === 'krl-jabodetabek') {
+    trains = ["Commuter Line Bogor", "Commuter Line Cikarang Loop"];
+  } else if (distKm > 400) {
+    trains = ["Argo Bromo Anggrek", "Argo Wilis", "Bima Luxury", "Gajayana", "Jayabaya"];
+  }
+  trains.forEach(t => {
+    const badge = document.createElement('span');
+    badge.className = 'px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-500 border border-amber-500/30 text-xs font-semibold';
+    badge.innerText = t;
+    trainBadges.appendChild(badge);
+  });
+
+  activeHighlightedPolyline = [ [sOrigin.lat, sOrigin.lng], [sDest.lat, sDest.lng] ];
+}
+
+function highlightRouteOnMap() {
+  if (!activeHighlightedPolyline || !map) return;
+  toggleRouteFinderModal();
+
+  map.fitBounds(activeHighlightedPolyline, { padding: [80, 80] });
+
+  const tempLine = L.polyline(activeHighlightedPolyline, {
+    color: '#f59e0b',
+    weight: 6,
+    dashArray: '10, 10',
+    opacity: 0.95
+  }).addTo(map);
+
+  setTimeout(() => {
+    map.removeLayer(tempLine);
+  }, 10000);
+}
+
+function calcDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+// ========================================================
+// PETA DIAGRAM SKEMATIK
+// ========================================================
+function toggleSchematicView() {
+  const modal = document.getElementById('schematicModal');
+  modal.classList.toggle('hidden');
+
+  if (!modal.classList.contains('hidden')) {
+    renderSchematicDiagram();
+  }
+}
+
+function renderSchematicDiagram() {
+  const container = document.getElementById('schematicDiagramContainer');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="space-y-6">
+      <div>
+        <div class="flex items-center gap-2 mb-2 font-bold text-red-400 text-xs md:text-sm">
+          <span class="w-3 h-3 rounded-full bg-red-600"></span>
+          <span>KORIDOR KERETA CEPAT WHOOSH (142 KM)</span>
+        </div>
+        <div class="flex items-center justify-between relative py-3 overflow-x-auto no-scrollbar">
+          <div class="absolute left-0 right-0 h-2 bg-red-600 rounded-full z-0 top-1/2 -translate-y-1/2"></div>
+          ${renderSchematicNodes([
+            { name: "Halim", code: "HLM", transit: "LRT" },
+            { name: "Karawang", code: "KRW" },
+            { name: "Padalarang", code: "PDL", transit: "Feeder" },
+            { name: "Tegalluar", code: "TGL", transit: "Shuttle" }
+          ], '#ef4444')}
+        </div>
+      </div>
+
+      <div>
+        <div class="flex items-center gap-2 mb-2 font-bold text-cyan-400 text-xs md:text-sm">
+          <span class="w-3 h-3 rounded-full bg-cyan-500"></span>
+          <span>COMMUTER LINE BOGOR (JAKARTA KOTA - BOGOR)</span>
+        </div>
+        <div class="flex items-center justify-between relative py-3 overflow-x-auto no-scrollbar">
+          <div class="absolute left-0 right-0 h-2 bg-cyan-500 rounded-full z-0 top-1/2 -translate-y-1/2"></div>
+          ${renderSchematicNodes([
+            { name: "Jakarta Kota", code: "JAKK" },
+            { name: "Juanda", code: "JUA", transit: "BRT" },
+            { name: "Manggarai", code: "MRI", transit: "Sentral Hub" },
+            { name: "Cawang", code: "CW", transit: "LRT" },
+            { name: "Depok", code: "DP" },
+            { name: "Bojonggede", code: "BJD" },
+            { name: "Bogor", code: "BOO", transit: "Biskita" }
+          ], '#06b6d4')}
+        </div>
+      </div>
+
+      <div>
+        <div class="flex items-center gap-2 mb-2 font-bold text-emerald-400 text-xs md:text-sm">
+          <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+          <span>COMMUTER LINE YOGYAKARTA - SOLO BALAPAN - PALUR</span>
+        </div>
+        <div class="flex items-center justify-between relative py-3 overflow-x-auto no-scrollbar">
+          <div class="absolute left-0 right-0 h-2 bg-emerald-500 rounded-full z-0 top-1/2 -translate-y-1/2"></div>
+          ${renderSchematicNodes([
+            { name: "Yogyakarta", code: "YK", transit: "KA Bandara" },
+            { name: "Lempuyangan", code: "LPN" },
+            { name: "Maguwo", code: "MGW", transit: "Bandara" },
+            { name: "Klaten", code: "KT" },
+            { name: "Purwosari", code: "PWS" },
+            { name: "Solo Balapan", code: "SLO", transit: "Terminal Bus" },
+            { name: "Palur", code: "PL" }
+          ], '#10b981')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSchematicNodes(nodes, color) {
+  return nodes.map(n => `
+    <div class="relative z-10 flex flex-col items-center cursor-pointer group bg-slate-900/90 p-2 rounded-xl border border-white/10 shrink-0 min-w-[90px]">
+      <div class="w-4 h-4 rounded-full border-2 border-white shadow" style="background: ${color}"></div>
+      <span class="font-bold text-xs text-white mt-1.5">${n.name}</span>
+      <span class="text-[9px] font-mono text-amber-400">${n.code}</span>
+      ${n.transit ? `<span class="mt-1 px-1.5 py-0.2 rounded text-[8px] bg-white/20 text-slate-200 font-semibold">${n.transit}</span>` : ''}
+    </div>
+  `).join('');
+}
+
+// ========================================================
+// WIDGET PROFIL ELEVASI (SVG)
+// ========================================================
+function openElevationWidget(routeKey) {
+  const route = RAILWAY_ROUTES[routeKey];
+  if (!route || !route.elevations) return;
+
+  const widget = document.getElementById('elevationProfileWidget');
+  widget.classList.remove('hidden');
+
+  document.getElementById('elevationRouteName').innerText = `Profil Elevasi: ${route.name}`;
+
+  const minElev = Math.min(...route.elevations);
+  const maxElev = Math.max(...route.elevations);
+  document.getElementById('elevationMinLabel').innerText = `Min: ${minElev} mdpl`;
+  document.getElementById('elevationMaxLabel').innerText = `Max: ${maxElev} mdpl`;
+
+  renderSvgElevationChart(route);
+}
+
+function closeElevationWidget() {
+  const widget = document.getElementById('elevationProfileWidget');
+  widget.classList.add('hidden');
+}
+
+function renderSvgElevationChart(route) {
+  const container = document.getElementById('elevationChartContainer');
+  const w = container.clientWidth || 500;
+  const h = container.clientHeight || 120;
+  const pad = 25;
+
+  const min = Math.min(...route.elevations);
+  const max = Math.max(...route.elevations);
+  const range = (max - min) || 1;
+
+  const pts = route.elevations.map((elev, idx) => {
+    const x = pad + (idx / (route.elevations.length - 1)) * (w - 2 * pad);
+    const y = (h - pad) - ((elev - min) / range) * (h - 2 * pad);
+    return { x, y, elev, name: route.stations[idx] };
+  });
+
+  const pathD = pts.reduce((acc, p, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`, '');
+  const areaD = `${pathD} L ${pts[pts.length-1].x} ${h - pad} L ${pts[0].x} ${h - pad} Z`;
+
+  container.innerHTML = `
+    <svg width="100%" height="100%" viewBox="0 0 ${w} ${h}" class="overflow-visible">
+      <defs>
+        <linearGradient id="elevGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.45"/>
+          <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.0"/>
+        </linearGradient>
+      </defs>
+      <path d="${areaD}" fill="url(#elevGrad)"/>
+      <path d="${pathD}" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+      ${pts.map(p => `
+        <circle cx="${p.x}" cy="${p.y}" r="5" fill="#ffffff" stroke="#f59e0b" stroke-width="2.5" class="cursor-pointer hover:scale-150 transition" 
+          onmouseover="showElevationScrub('${p.name}', ${p.elev})"
+        />
+        <text x="${p.x}" y="${h - 5}" font-size="9" fill="#94a3b8" text-anchor="middle">${p.name}</text>
+      `).join('')}
+    </svg>
+  `;
+}
+
+function showElevationScrub(name, elev) {
+  const scrubEl = document.getElementById('elevationScrubInfo');
+  if (scrubEl) scrubEl.innerText = `Stasiun ${name}: ${elev} mdpl`;
+}
+
+// ========================================================
+// CUACA REAL-TIME (DENGAN CACHING HEMAT MEMORI)
+// ========================================================
+async function fetchStationWeather(lat, lng) {
+  const cacheKey = `${lat.toFixed(2)},${lng.toFixed(2)}`;
+  const tempEl = document.getElementById('weatherTemp');
+  const condEl = document.getElementById('weatherCondition');
+  const iconEl = document.getElementById('weatherIcon');
+
+  if (weatherCache[cacheKey]) {
+    applyWeatherData(weatherCache[cacheKey]);
+    return;
+  }
+
+  try {
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
+    const data = await res.json();
+    if (data && data.current_weather) {
+      weatherCache[cacheKey] = data.current_weather;
+      applyWeatherData(data.current_weather);
+    }
+  } catch (err) {
+    tempEl.innerText = "Cuaca Normal";
+    condEl.innerText = "Data tersimpan offline";
+  }
+}
+
+function applyWeatherData(cw) {
+  const tempEl = document.getElementById('weatherTemp');
+  const condEl = document.getElementById('weatherCondition');
+  const iconEl = document.getElementById('weatherIcon');
+
+  tempEl.innerText = `${cw.temperature}°C`;
+  const code = cw.weathercode;
+  if (code === 0) {
+    condEl.innerText = "Cerah Berawan";
+    iconEl.innerHTML = `<i class="fa-solid fa-sun text-amber-500"></i>`;
+  } else if (code <= 3) {
+    condEl.innerText = "Berawan";
+    iconEl.innerHTML = `<i class="fa-solid fa-cloud text-slate-400"></i>`;
+  } else if (code <= 67) {
+    condEl.innerText = "Hujan Ringan";
+    iconEl.innerHTML = `<i class="fa-solid fa-cloud-rain text-blue-400"></i>`;
+  } else {
+    condEl.innerText = "Hujan Deras";
+    iconEl.innerHTML = `<i class="fa-solid fa-cloud-bolt text-indigo-400"></i>`;
+  }
+}
+
+// ========================================================
+// FOTO BEFORE / AFTER HERITAGE
+// ========================================================
+let currentActiveStationHeritage = null;
+
+function setupHeritagePhotoSwitch(station) {
+  const switchBox = document.getElementById('drawerHeritageSwitch');
+  currentActiveStationHeritage = station;
+
+  if (station.pastImage) {
+    switchBox.classList.remove('hidden');
+    switchHeritagePhoto('now');
+  } else {
+    switchBox.classList.add('hidden');
+  }
+}
+
+function switchHeritagePhoto(type) {
+  if (!currentActiveStationHeritage) return;
+  const imgEl = document.getElementById('drawerImage');
+  const btnNow = document.getElementById('btnPhotoNow');
+  const btnPast = document.getElementById('btnPhotoPast');
+
+  if (type === 'past') {
+    imgEl.src = currentActiveStationHeritage.pastImage;
+    btnPast.className = 'px-2 py-0.5 rounded bg-amber-600 text-white';
+    btnNow.className = 'px-2 py-0.5 rounded text-slate-300 hover:text-white';
+  } else {
+    imgEl.src = currentActiveStationHeritage.image;
+    btnNow.className = 'px-2 py-0.5 rounded bg-amber-600 text-white';
+    btnPast.className = 'px-2 py-0.5 rounded text-slate-300 hover:text-white';
+  }
+}
+
+// ========================================================
+// PENGENDALI DIREKTORI & DRAWER DETAIL
+// ========================================================
+function renderStationDirectory() {
+  const container = document.getElementById('stationListContainer');
+  if (!container) return;
+
+  const stations = getFilteredStations();
+  container.innerHTML = '';
+
+  if (stations.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-10 text-slate-400 text-xs md:text-sm">
+        <i class="fa-solid fa-magnifying-glass text-xl mb-2 opacity-50 block"></i>
+        Tidak ditemukan stasiun yang cocok.
+      </div>
+    `;
+    return;
+  }
+
+  const isLight = (currentTheme === 'light');
+
+  stations.forEach(station => {
+    const isSelected = (station.id === activeStationId);
+    const pinColor = PIN_COLORS[station.category] || '#f59e0b';
+
+    const item = document.createElement('div');
+    item.id = `card-${station.id}`;
+    item.onclick = () => {
+      selectStation(station.id, true);
+      if (window.innerWidth < 768) toggleMobileSidebar();
+    };
+
+    let cardClasses = 'px-3.5 py-2.5 rounded-xl cursor-pointer transition flex items-center justify-between gap-3 border ';
+    if (isLight) {
+      cardClasses += isSelected ? 'station-card-active ' : 'station-card-default ';
+    } else {
+      cardClasses += isSelected
+        ? 'bg-amber-500/10 border-amber-500/50 shadow-md shadow-amber-950/20 '
+        : 'bg-slate-900/50 border-white/5 hover:bg-slate-800/70 hover:border-white/10 ';
+    }
+
+    item.className = cardClasses;
+
+    item.innerHTML = `
+      <div class="flex items-center gap-3 min-w-0">
+        <span class="w-10 h-7 rounded-lg flex items-center justify-center shrink-0 font-mono font-bold text-xs text-white shadow-sm" style="background: ${pinColor}">
+          ${station.code}
+        </span>
+        <div class="min-w-0">
+          <h4 class="text-xs md:text-sm font-semibold truncate ${isLight ? 'station-card-title' : 'text-slate-100'}">${station.name}</h4>
+          <p class="text-[11px] md:text-xs truncate ${isLight ? 'station-card-sub' : 'text-slate-400'}">${station.city}</p>
+        </div>
+      </div>
+      <div class="shrink-0 text-right">
+        <span class="text-xs font-mono font-semibold ${isLight ? 'station-card-elev' : 'text-amber-400'}">${station.elevation}m</span>
+      </div>
+    `;
+
+    container.appendChild(item);
+  });
+}
+
+function selectStation(stationId, shouldPan = true) {
+  if (typeof STATIONS_DATA === 'undefined') return;
+  const station = STATIONS_DATA.find(s => s.id === stationId);
+  if (!station) return;
+
+  activeStationId = stationId;
+
+  document.querySelectorAll('.station-marker-icon').forEach(el => el.classList.remove('pin-selected'));
+  const pinEl = document.getElementById(`pin-${stationId}`);
+  if (pinEl) pinEl.classList.add('pin-selected');
+
+  renderStationDirectory();
+
+  if (shouldPan && map) {
+    map.flyTo([station.lat, station.lng], 14, { duration: 1.0, easeLinearity: 0.25 });
+  }
+
+  populateDrawer(station);
+  openStationDrawer();
+}
+
+function populateDrawer(station) {
+  document.getElementById('drawerTitle').innerText = `${station.name} (${station.code})`;
+  document.getElementById('drawerCity').innerText = station.city;
+  document.getElementById('drawerElevation').innerText = `Elevasi: ${station.elevation} mdpl`;
+  document.getElementById('drawerYears').innerText = station.operationalYears || station.status;
+  document.getElementById('drawerReview').innerText = station.review;
+  document.getElementById('drawerLayoutGuide').innerText = station.layout;
+
+  const isLight = (currentTheme === 'light');
+
+  const badgeType = document.getElementById('drawerBadgeType');
+  badgeType.innerText = station.type;
+  badgeType.style.backgroundColor = `${PIN_COLORS[station.category]}20`;
+  badgeType.style.color = PIN_COLORS[station.category];
+
+  const badgeStatus = document.getElementById('drawerBadgeStatus');
+  badgeStatus.innerText = station.status;
+  badgeStatus.className = station.status.includes('Aktif')
+    ? 'text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+    : 'text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30';
+
+  const drawerImg = document.getElementById('drawerImage');
+  drawerImg.src = station.image;
+  setupHeritagePhotoSwitch(station);
+
+  fetchStationWeather(station.lat, station.lng);
+
+  const intermodalContainer = document.getElementById('drawerIntermodalBadges');
+  intermodalContainer.innerHTML = '';
+  if (station.intermodal && station.intermodal.length > 0) {
+    station.intermodal.forEach(key => {
+      const cfg = INTERMODAL_CONFIG[key];
+      if (cfg) {
+        const badge = document.createElement('span');
+        badge.className = `px-2 py-0.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 ${cfg.color}`;
+        badge.innerHTML = `<i class="fa-solid ${cfg.icon}"></i> ${cfg.label}`;
+        intermodalContainer.appendChild(badge);
+      }
+    });
+  } else {
+    intermodalContainer.innerHTML = `<span class="text-xs text-slate-400">Akses langsung transportasi lokal & taksi</span>`;
+  }
+
+  const facContainer = document.getElementById('drawerFacilities');
+  facContainer.innerHTML = '';
+  station.facilities.forEach(fac => {
+    const item = document.createElement('div');
+    item.className = isLight
+      ? 'p-2.5 bg-slate-100/90 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 flex items-center gap-2 font-medium shadow-sm'
+      : 'p-2.5 bg-slate-900/80 border border-white/5 rounded-xl text-xs md:text-sm text-slate-200 flex items-center gap-2 font-medium';
+    item.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 text-xs shrink-0"></i> <span class="truncate">${fac}</span>`;
+    facContainer.appendChild(item);
+  });
+
+  const mapsLink = document.getElementById('drawerLayoutLink');
+  mapsLink.href = `https://www.google.com/maps/search/?api=1&query=${station.lat},${station.lng}`;
+
+  const ticketBtn = document.getElementById('drawerTicketBtn');
+  if (station.category === 'whoosh') {
+    ticketBtn.href = 'https://ticket.kcic.co.id';
+    ticketBtn.innerHTML = '<i class="fa-solid fa-bolt-lightning mr-2"></i> Cek Tiket Whoosh (KCIC)';
+  } else {
+    ticketBtn.href = 'https://booking.kai.id';
+    ticketBtn.innerHTML = '<i class="fa-solid fa-ticket mr-2"></i> Cek Tiket di Access by KAI';
+  }
+}
+
+function toggleStationDrawer() {
+  const drawer = document.getElementById('stationDrawer');
+  if (drawer.classList.contains('drawer-active')) {
+    closeStationDrawer();
+  } else {
+    if (!activeStationId && typeof STATIONS_DATA !== 'undefined' && STATIONS_DATA.length > 0) {
+      selectStation(STATIONS_DATA[0].id, true);
+    } else {
+      openStationDrawer();
+    }
+  }
+}
+
+function openStationDrawer() {
+  const drawer = document.getElementById('stationDrawer');
+  if (drawer) {
+    drawer.classList.add('drawer-active');
+    document.body.classList.add('drawer-is-open');
+  }
+}
+
+function closeStationDrawer() {
+  const drawer = document.getElementById('stationDrawer');
+  if (drawer) {
+    drawer.classList.remove('drawer-active');
+    document.body.classList.remove('drawer-is-open');
+  }
+  activeStationId = null;
+  document.querySelectorAll('.station-marker-icon').forEach(el => el.classList.remove('pin-selected'));
+  renderStationDirectory();
+}
+
 function getFilteredStations() {
   if (typeof STATIONS_DATA === 'undefined') return [];
   return STATIONS_DATA.filter(station => {
@@ -369,205 +969,9 @@ function updateStationMarkers() {
   });
 
   const countEl = document.getElementById('stationCountDisplay');
-  if (countEl) {
-    countEl.innerText = `${stations.length} Titik`;
-  }
+  if (countEl) countEl.innerText = `${stations.length} Titik`;
 }
 
-// Render Direktori Kiri Sesuai Tema
-function renderStationDirectory() {
-  const container = document.getElementById('stationListContainer');
-  if (!container) return;
-
-  const stations = getFilteredStations();
-  container.innerHTML = '';
-
-  if (stations.length === 0) {
-    container.innerHTML = `
-      <div class="text-center py-10 text-slate-400 text-xs md:text-sm">
-        <i class="fa-solid fa-magnifying-glass text-xl mb-2 opacity-50 block"></i>
-        Tidak ditemukan stasiun yang cocok.
-      </div>
-    `;
-    return;
-  }
-
-  const isLight = (currentTheme === 'light');
-
-  stations.forEach(station => {
-    const isSelected = (station.id === activeStationId);
-    const pinColor = PIN_COLORS[station.category] || '#f59e0b';
-
-    const item = document.createElement('div');
-    item.id = `card-${station.id}`;
-    item.onclick = () => {
-      selectStation(station.id, true);
-      if (window.innerWidth < 768) {
-        toggleMobileSidebar();
-      }
-    };
-
-    let cardClasses = 'px-3.5 py-2.5 rounded-xl cursor-pointer transition flex items-center justify-between gap-3 border ';
-    if (isLight) {
-      cardClasses += isSelected ? 'station-card-active ' : 'station-card-default ';
-    } else {
-      cardClasses += isSelected
-        ? 'bg-amber-500/10 border-amber-500/50 shadow-md shadow-amber-950/20 '
-        : 'bg-slate-900/50 border-white/5 hover:bg-slate-800/70 hover:border-white/10 ';
-    }
-
-    item.className = cardClasses;
-
-    item.innerHTML = `
-      <div class="flex items-center gap-3 min-w-0">
-        <span class="w-10 h-7 rounded-lg flex items-center justify-center shrink-0 font-mono font-bold text-xs text-white shadow-sm" style="background: ${pinColor}">
-          ${station.code}
-        </span>
-        <div class="min-w-0">
-          <h4 class="text-xs md:text-sm font-semibold truncate ${isLight ? 'station-card-title' : 'text-slate-100'}">${station.name}</h4>
-          <p class="text-[11px] md:text-xs truncate ${isLight ? 'station-card-sub' : 'text-slate-400'}">${station.city}</p>
-        </div>
-      </div>
-      <div class="shrink-0 text-right">
-        <span class="text-xs font-mono font-semibold ${isLight ? 'station-card-elev' : 'text-amber-400'}">${station.elevation}m</span>
-      </div>
-    `;
-
-    container.appendChild(item);
-  });
-}
-
-// Buka / Tutup Drawer Detail
-function toggleStationDrawer() {
-  const drawer = document.getElementById('stationDrawer');
-  if (drawer.classList.contains('drawer-active')) {
-    closeStationDrawer();
-  } else {
-    if (!activeStationId && typeof STATIONS_DATA !== 'undefined' && STATIONS_DATA.length > 0) {
-      selectStation(STATIONS_DATA[0].id, true);
-    } else {
-      openStationDrawer();
-    }
-  }
-}
-
-function openStationDrawer() {
-  const drawer = document.getElementById('stationDrawer');
-  if (drawer) {
-    drawer.classList.add('drawer-active');
-    document.body.classList.add('drawer-is-open');
-  }
-  const detailBtn = document.getElementById('toggleDetailBtn');
-  if (detailBtn) {
-    detailBtn.classList.add('border-amber-500', 'bg-amber-500/15');
-  }
-}
-
-function closeStationDrawer() {
-  const drawer = document.getElementById('stationDrawer');
-  if (drawer) {
-    drawer.classList.remove('drawer-active');
-    document.body.classList.remove('drawer-is-open');
-  }
-  const detailBtn = document.getElementById('toggleDetailBtn');
-  if (detailBtn) {
-    detailBtn.classList.remove('border-amber-500', 'bg-amber-500/15');
-  }
-  activeStationId = null;
-  document.querySelectorAll('.station-marker-icon').forEach(el => el.classList.remove('pin-selected'));
-  renderStationDirectory();
-}
-
-// Seleksi Stasiun
-function selectStation(stationId, shouldPan = true) {
-  if (typeof STATIONS_DATA === 'undefined') return;
-  const station = STATIONS_DATA.find(s => s.id === stationId);
-  if (!station) return;
-
-  activeStationId = stationId;
-
-  document.querySelectorAll('.station-marker-icon').forEach(el => el.classList.remove('pin-selected'));
-  const pinEl = document.getElementById(`pin-${stationId}`);
-  if (pinEl) pinEl.classList.add('pin-selected');
-
-  renderStationDirectory();
-
-  if (shouldPan && map) {
-    map.flyTo([station.lat, station.lng], 14, {
-      duration: 1.0,
-      easeLinearity: 0.25
-    });
-  }
-
-  populateDrawer(station);
-  openStationDrawer();
-}
-
-function populateDrawer(station) {
-  document.getElementById('drawerTitle').innerText = `${station.name} (${station.code})`;
-  document.getElementById('drawerCity').innerText = station.city;
-  document.getElementById('drawerElevation').innerText = `Elevasi: ${station.elevation} mdpl`;
-  document.getElementById('drawerYears').innerText = station.operationalYears || station.status;
-  document.getElementById('drawerReview').innerText = station.review;
-  document.getElementById('drawerLayoutGuide').innerText = station.layout;
-
-  const isLight = (currentTheme === 'light');
-
-  // Badge Tipe
-  const badgeType = document.getElementById('drawerBadgeType');
-  badgeType.innerText = station.type;
-  if (isLight) {
-    badgeType.style.backgroundColor = `${PIN_COLORS[station.category]}20`;
-    badgeType.style.color = PIN_COLORS[station.category];
-    badgeType.style.border = `1px solid ${PIN_COLORS[station.category]}50`;
-  } else {
-    badgeType.style.backgroundColor = `${PIN_COLORS[station.category]}25`;
-    badgeType.style.color = PIN_COLORS[station.category];
-    badgeType.style.border = 'none';
-  }
-
-  // Badge Status
-  const badgeStatus = document.getElementById('drawerBadgeStatus');
-  badgeStatus.innerText = station.status;
-  if (station.status.includes('Aktif')) {
-    badgeStatus.className = isLight
-      ? 'text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase bg-emerald-100 text-emerald-800 border border-emerald-300'
-      : 'text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
-  } else {
-    badgeStatus.className = isLight
-      ? 'text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase bg-amber-100 text-amber-900 border border-amber-300'
-      : 'text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30';
-  }
-
-  const drawerImg = document.getElementById('drawerImage');
-  drawerImg.src = station.image;
-
-  // Fasilitas
-  const facContainer = document.getElementById('drawerFacilities');
-  facContainer.innerHTML = '';
-  station.facilities.forEach(fac => {
-    const item = document.createElement('div');
-    item.className = isLight
-      ? 'p-2.5 bg-slate-100/90 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 flex items-center gap-2 font-medium shadow-sm'
-      : 'p-2.5 bg-slate-900/80 border border-white/5 rounded-xl text-xs md:text-sm text-slate-200 flex items-center gap-2 font-medium';
-    item.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 text-xs shrink-0"></i> <span class="truncate">${fac}</span>`;
-    facContainer.appendChild(item);
-  });
-
-  const mapsLink = document.getElementById('drawerLayoutLink');
-  mapsLink.href = `https://www.google.com/maps/search/?api=1&query=${station.lat},${station.lng}`;
-
-  const ticketBtn = document.getElementById('drawerTicketBtn');
-  if (station.category === 'whoosh') {
-    ticketBtn.href = 'https://ticket.kcic.co.id';
-    ticketBtn.innerHTML = '<i class="fa-solid fa-bolt-lightning mr-2"></i> Cek Tiket Whoosh (KCIC)';
-  } else {
-    ticketBtn.href = 'https://booking.kai.id';
-    ticketBtn.innerHTML = '<i class="fa-solid fa-ticket mr-2"></i> Cek Tiket di Access by KAI';
-  }
-}
-
-// Handlers Filter Kategori
 function filterCategory(cat, element) {
   currentCategory = cat;
   document.querySelectorAll('.category-pill').forEach(btn => btn.classList.remove('active'));
@@ -586,11 +990,9 @@ function handleRegionSelect(region) {
 function handleSearch(val) {
   searchQuery = val;
   const clearBtn = document.getElementById('clearSearchBtn');
-  if (val && val.length > 0) {
-    clearBtn.classList.remove('hidden');
-  } else {
-    clearBtn.classList.add('hidden');
-  }
+  if (val && val.length > 0) clearBtn.classList.remove('hidden');
+  else clearBtn.classList.add('hidden');
+
   updateStationMarkers();
   renderStationDirectory();
 }
