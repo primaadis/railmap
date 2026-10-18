@@ -10,6 +10,18 @@ body {
   height: 100%;
 }
 
+/* Navigasi Kanan Dinamis (Berdampingan Mulus dengan Drawer) */
+#rightControlsBar {
+  transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  right: 14px;
+}
+
+@media (min-width: 768px) {
+  body.drawer-is-open #rightControlsBar {
+    right: 426px; /* Menggeser tombol ke kiri drawer secara otomatis di PC */
+  }
+}
+
 /* 60 FPS Drawer Transitions */
 .station-sheet {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
