@@ -1,6 +1,6 @@
 /**
  * KAI GIS CS & HERITAGE EXPLORER CONTROLLER
- * Versi 4.1 - OpenRailwayMap Live Tiles, Search & Drawer Responsive
+ * Versi 4.2 - High Z-Index Desktop Panel, Click Propagation Fix & OpenRailwayMap
  */
 
 let map;
@@ -29,22 +29,39 @@ const PIN_ICONS = {
   heritage: 'fa-monument'
 };
 
-// Inisialisasi Aplikasi Saat Halaman Selesai Dimuat
+// Inisialisasi Aplikasi
 document.addEventListener('DOMContentLoaded', () => {
   initMap();
   renderStationDirectory();
   updateStationMarkers();
+
+  // Cegah propagasi klik pada panel navigasi kanan dan drawer ke peta Leaflet
+  const rightControls = document.getElementById('rightControlsBar');
+  if (rightControls) {
+    L.DomEvent.disableClickPropagation(rightControls);
+    L.DomEvent.disableScrollPropagation(rightControls);
+  }
+
+  const drawer = document.getElementById('stationDrawer');
+  if (drawer) {
+    L.DomEvent.disableClickPropagation(drawer);
+    L.DomEvent.disableScrollPropagation(drawer);
+  }
+
+  // Pada PC (Layar Lebar), buka stasiun utama pertama secara default
+  if (window.innerWidth >= 1024 && typeof STATIONS_DATA !== 'undefined' && STATIONS_DATA.length > 0) {
+    selectStation(STATIONS_DATA[0].id, false);
+  }
 });
 
-// Inisialisasi Peta Leaflet & Layer
+// Inisialisasi Peta Leaflet
 function initMap() {
-  // Titik tengah Pulau Jawa (default)
   map = L.map('map', {
     zoomControl: false,
     attributionControl: false
   }).setView([-7.25, 110.15], 7);
 
-  // Zoom Control Posisi Kiri Atas
+  // Zoom Control di Kiri Atas
   L.control.zoom({ position: 'topleft' }).addTo(map);
 
   // Attribution Control di Kanan Bawah
@@ -53,10 +70,10 @@ function initMap() {
     prefix: '<span class="text-[9px] text-slate-500">KAI GIS • OpenRailwayMap</span>'
   }).addTo(map);
 
-  // Default Basemap: CartoDB Dark Matter (Fokus visual rel dan stasiun)
+  // Basemap Default: CartoDB Dark Matter
   setBaseMap('dark');
 
-  // Layer Rel Dunia OpenRailwayMap (Standard Railway Infrastructure)
+  // Layer Rel OpenRailwayMap
   railwayOverlayLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
     maxZoom: 19,
     subdomains: ['a', 'b', 'c'],
@@ -64,13 +81,13 @@ function initMap() {
   });
   railwayOverlayLayer.addTo(map);
 
-  // Tutup layer menu saat klik di luar
+  // Tutup layer menu saat peta diklik
   map.on('click', () => {
     closeLayerMenu();
   });
 }
 
-// Pengganti Basemap Kartografi
+// Ubah Basemap Kartografi
 function setBaseMap(type) {
   if (currentBaseLayer) {
     map.removeLayer(currentBaseLayer);
@@ -127,10 +144,13 @@ function toggleRailOverlay(checked) {
   }
 }
 
-// Toggle Dropdown Menu Layer
-function toggleLayerMenu() {
+// Toggle Dropdown Menu Mode Peta
+function toggleLayerMenu(event) {
+  if (event) event.stopPropagation();
   const menu = document.getElementById('layerMenuDropdown');
-  menu.classList.toggle('hidden');
+  if (menu) {
+    menu.classList.toggle('hidden');
+  }
 }
 
 function closeLayerMenu() {
@@ -140,16 +160,20 @@ function closeLayerMenu() {
   }
 }
 
+// Reset Zoom Pandangan Peta
+function resetMapView() {
+  if (!map) return;
+  map.flyTo([-7.25, 110.15], 7, {
+    duration: 1.0
+  });
+}
+
 // Filter Data Stasiun
 function getFilteredStations() {
+  if (typeof STATIONS_DATA === 'undefined') return [];
   return STATIONS_DATA.filter(station => {
-    // Kategori
     const matchCat = (currentCategory === 'all') || (station.category === currentCategory);
-
-    // Daop / Divre
     const matchRegion = (currentRegion === 'ALL') || (station.region === currentRegion);
-
-    // Pencarian Teks
     const q = searchQuery.toLowerCase().trim();
     const matchSearch = !q || (
       station.name.toLowerCase().includes(q) ||
@@ -157,14 +181,12 @@ function getFilteredStations() {
       station.city.toLowerCase().includes(q) ||
       station.region.toLowerCase().includes(q)
     );
-
     return matchCat && matchRegion && matchSearch;
   });
 }
 
 // Render Pin / Marker di Peta
 function updateStationMarkers() {
-  // Hapus marker lama
   stationMarkers.forEach(m => map.removeLayer(m));
   stationMarkers = [];
 
@@ -201,7 +223,6 @@ function updateStationMarkers() {
     stationMarkers.push(marker);
   });
 
-  // Perbarui total counter di sidebar
   const countEl = document.getElementById('stationCountDisplay');
   if (countEl) {
     countEl.innerText = `${stations.length} Titik`;
@@ -234,7 +255,6 @@ function renderStationDirectory() {
     card.id = `card-${station.id}`;
     card.onclick = () => {
       selectStation(station.id, true);
-      // Di mobile, tutup sidebar katalog saat stasiun dipilih
       if (window.innerWidth < 768) {
         toggleMobileSidebar();
       }
@@ -266,34 +286,18 @@ function renderStationDirectory() {
   });
 }
 
-// Seleksi Stasiun & Buka Lembar Detail (Drawer)
-function selectStation(stationId, shouldPan = true) {
-  const station = STATIONS_DATA.find(s => s.id === stationId);
-  if (!station) return;
-
-  activeStationId = stationId;
-
-  // Sorot pin di peta
-  document.querySelectorAll('.station-marker-icon').forEach(el => el.classList.remove('pin-selected'));
-  const pinEl = document.getElementById(`pin-${stationId}`);
-  if (pinEl) pinEl.classList.add('pin-selected');
-
-  // Perbarui tampilan item direktori
-  renderStationDirectory();
-
-  // Bawa peta ke titik lokasi stasiun
-  if (shouldPan && map) {
-    map.flyTo([station.lat, station.lng], 14, {
-      duration: 1.0,
-      easeLinearity: 0.25
-    });
+// Buka/Tutup Toggle Info Detail Stasiun
+function toggleStationDrawer() {
+  const drawer = document.getElementById('stationDrawer');
+  if (drawer.classList.contains('drawer-active')) {
+    closeStationDrawer();
+  } else {
+    if (!activeStationId && typeof STATIONS_DATA !== 'undefined' && STATIONS_DATA.length > 0) {
+      selectStation(STATIONS_DATA[0].id, true);
+    } else {
+      openStationDrawer();
+    }
   }
-
-  // Isi data ke drawer
-  populateDrawer(station);
-
-  // Buka Drawer
-  openStationDrawer();
 }
 
 // Buka & Tutup Drawer
@@ -301,6 +305,11 @@ function openStationDrawer() {
   const drawer = document.getElementById('stationDrawer');
   if (drawer) {
     drawer.classList.add('drawer-active');
+    document.body.classList.add('drawer-is-open');
+  }
+  const detailBtn = document.getElementById('toggleDetailBtn');
+  if (detailBtn) {
+    detailBtn.classList.add('border-amber-500/50', 'bg-amber-500/15', 'text-amber-300');
   }
 }
 
@@ -308,10 +317,40 @@ function closeStationDrawer() {
   const drawer = document.getElementById('stationDrawer');
   if (drawer) {
     drawer.classList.remove('drawer-active');
+    document.body.classList.remove('drawer-is-open');
+  }
+  const detailBtn = document.getElementById('toggleDetailBtn');
+  if (detailBtn) {
+    detailBtn.classList.remove('border-amber-500/50', 'bg-amber-500/15', 'text-amber-300');
   }
   activeStationId = null;
   document.querySelectorAll('.station-marker-icon').forEach(el => el.classList.remove('pin-selected'));
   renderStationDirectory();
+}
+
+// Seleksi Stasiun
+function selectStation(stationId, shouldPan = true) {
+  if (typeof STATIONS_DATA === 'undefined') return;
+  const station = STATIONS_DATA.find(s => s.id === stationId);
+  if (!station) return;
+
+  activeStationId = stationId;
+
+  document.querySelectorAll('.station-marker-icon').forEach(el => el.classList.remove('pin-selected'));
+  const pinEl = document.getElementById(`pin-${stationId}`);
+  if (pinEl) pinEl.classList.add('pin-selected');
+
+  renderStationDirectory();
+
+  if (shouldPan && map) {
+    map.flyTo([station.lat, station.lng], 14, {
+      duration: 1.0,
+      easeLinearity: 0.25
+    });
+  }
+
+  populateDrawer(station);
+  openStationDrawer();
 }
 
 // Isi Konten Drawer
@@ -323,7 +362,6 @@ function populateDrawer(station) {
   document.getElementById('drawerReview').innerText = station.review;
   document.getElementById('drawerLayoutGuide').innerText = station.layout;
 
-  // Badge Tipe & Status
   const badgeType = document.getElementById('drawerBadgeType');
   badgeType.innerText = station.type;
   badgeType.style.backgroundColor = `${PIN_COLORS[station.category]}25`;
@@ -337,11 +375,9 @@ function populateDrawer(station) {
     badgeStatus.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full tracking-wider uppercase bg-amber-500/20 text-amber-400';
   }
 
-  // Foto Stasiun
   const drawerImg = document.getElementById('drawerImage');
   drawerImg.src = station.image;
 
-  // Fasilitas
   const facContainer = document.getElementById('drawerFacilities');
   facContainer.innerHTML = '';
   station.facilities.forEach(fac => {
@@ -351,11 +387,9 @@ function populateDrawer(station) {
     facContainer.appendChild(item);
   });
 
-  // Tautan Google Maps Akurat
   const mapsLink = document.getElementById('drawerLayoutLink');
   mapsLink.href = `https://www.google.com/maps/search/?api=1&query=${station.lat},${station.lng}`;
 
-  // Link Tiket KAI
   const ticketBtn = document.getElementById('drawerTicketBtn');
   if (station.category === 'whoosh') {
     ticketBtn.href = 'https://ticket.kcic.co.id';
@@ -366,11 +400,9 @@ function populateDrawer(station) {
   }
 }
 
-// Handlers Filter Kategori
+// Handlers Filter
 function filterCategory(cat, element) {
   currentCategory = cat;
-
-  // Ubah status visual tombol pill
   document.querySelectorAll('.category-pill').forEach(btn => btn.classList.remove('active'));
   if (element) {
     element.classList.add('active');
@@ -385,14 +417,12 @@ function filterCategory(cat, element) {
   renderStationDirectory();
 }
 
-// Handler Dropdown Daop / Divre
 function handleRegionSelect(region) {
   currentRegion = region;
   updateStationMarkers();
   renderStationDirectory();
 }
 
-// Handler Pencarian Input
 function handleSearch(val) {
   searchQuery = val;
   const clearBtn = document.getElementById('clearSearchBtn');
@@ -401,7 +431,6 @@ function handleSearch(val) {
   } else {
     clearBtn.classList.add('hidden');
   }
-
   updateStationMarkers();
   renderStationDirectory();
 }
@@ -412,7 +441,7 @@ function clearSearch() {
   handleSearch('');
 }
 
-// Toggle Sidebar Khusus Mobile
+// Sidebar Mobile
 function toggleMobileSidebar() {
   const sidebar = document.getElementById('sidebarDirectory');
   const backdrop = document.getElementById('mobileBackdrop');
@@ -426,13 +455,11 @@ function toggleMobileSidebar() {
     backdrop.classList.add('hidden');
   }
 
-  // Pastikan Leaflet menyesuaikan ukuran saat drawer terbuka/tutup
   setTimeout(() => {
     if (map) map.invalidateSize();
   }, 350);
 }
 
-// Handle Resize Window
 window.addEventListener('resize', () => {
   if (map) map.invalidateSize();
 });
