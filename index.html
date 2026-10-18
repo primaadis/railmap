@@ -23,39 +23,44 @@
   <!-- Custom Cinematic CSS -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body class="bg-[#070a11] text-slate-100 flex flex-col md:flex-row h-full overflow-hidden select-none antialiased">
+<body class="bg-[#070a11] text-slate-100 flex flex-col md:flex-row h-full overflow-hidden select-none antialiased theme-dark" id="appBody">
 
   <!-- TOP BAR KHUSUS MOBILE -->
-  <header class="md:hidden flex items-center justify-between px-4 py-2.5 bg-[#0b0f19]/95 backdrop-blur-md border-b border-white/5 z-30 shrink-0">
+  <header id="mobileHeader" class="md:hidden flex items-center justify-between px-4 py-2.5 bg-[#0b0f19]/95 backdrop-blur-md border-b border-white/5 z-30 shrink-0 transition-colors">
     <div class="flex items-center gap-2.5">
       <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-600 to-orange-500 flex items-center justify-center text-white shadow-md">
         <i class="fa-solid fa-train text-xs"></i>
       </div>
       <div>
-        <h1 class="text-xs font-bold text-white tracking-tight">KAI GeoPortal</h1>
-        <p class="text-[10px] text-amber-400 font-mono">Operations & Routes</p>
+        <h1 class="text-xs font-bold tracking-tight app-title-text">KAI GeoPortal</h1>
+        <p class="text-[10px] text-amber-500 font-mono">Operations & Routes</p>
       </div>
     </div>
-    <button onclick="toggleMobileSidebar()" class="px-3 py-1.5 bg-slate-900 border border-white/10 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5 active:scale-95 transition">
-      <i class="fa-solid fa-list-ul text-amber-400"></i>
-      <span>Daftar Stasiun</span>
-    </button>
+    <div class="flex items-center gap-1.5">
+      <button onclick="toggleTheme()" class="w-8 h-8 rounded-lg bg-slate-800/80 theme-btn-bg text-amber-400 flex items-center justify-center text-xs active:scale-95 transition" title="Ganti Mode Siang / Malam">
+        <i id="themeIconMobile" class="fa-solid fa-sun"></i>
+      </button>
+      <button onclick="toggleMobileSidebar()" class="px-2.5 py-1.5 bg-slate-900 border border-white/10 rounded-lg text-xs font-semibold flex items-center gap-1.5 active:scale-95 transition theme-alt-btn">
+        <i class="fa-solid fa-list-ul text-amber-500"></i>
+        <span>Katalog</span>
+      </button>
+    </div>
   </header>
 
   <!-- SIDEBAR DIREKTORI MINIMALIS & RESPONSIF -->
-  <aside id="sidebarDirectory" class="fixed inset-y-0 left-0 w-80 sm:w-96 md:w-[380px] bg-[#090d16]/98 md:static md:translate-x-0 -translate-x-full backdrop-blur-2xl border-r border-white/5 flex flex-col z-[1200] md:z-30 transition-transform duration-300 ease-out shrink-0">
+  <aside id="sidebarDirectory" class="fixed inset-y-0 left-0 w-80 sm:w-96 md:w-[380px] bg-[#090d16]/98 md:static md:translate-x-0 -translate-x-full backdrop-blur-2xl border-r border-white/5 flex flex-col z-[1200] md:z-30 transition-all duration-300 ease-out shrink-0">
     <!-- Header Sidebar -->
-    <div class="p-4 border-b border-white/5 space-y-3">
+    <div class="p-4 border-b border-white/5 space-y-3 header-divider">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-tr from-amber-600 via-orange-600 to-red-600 flex items-center justify-center text-white shadow-md shadow-orange-950/40">
             <i class="fa-solid fa-train-subway text-sm md:text-base"></i>
           </div>
           <div>
-            <h1 class="font-bold text-xs md:text-sm tracking-wide text-white flex items-center gap-2">
+            <h1 class="font-bold text-xs md:text-sm tracking-wide flex items-center gap-2 app-main-title">
               KAI GIS Explorer <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             </h1>
-            <p class="text-[11px] md:text-xs text-slate-400">Operasional Antarkota, Lokal & KRL</p>
+            <p class="text-[11px] md:text-xs text-slate-400 app-sub-title">Operasional Antarkota, Lokal & KRL</p>
           </div>
         </div>
         <button onclick="toggleMobileSidebar()" class="md:hidden w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
@@ -65,12 +70,12 @@
 
       <!-- Quick Search Box -->
       <div class="relative">
-        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs md:text-sm"></i>
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs md:text-sm"></i>
         <input 
           id="stationSearch"
           type="text" 
           placeholder="Cari stasiun, kode (GMR/BD), kota, jalur..." 
-          class="w-full pl-9 pr-8 py-2 text-xs md:text-sm bg-slate-900/90 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition shadow-inner"
+          class="w-full pl-9 pr-8 py-2 text-xs md:text-sm rounded-xl transition shadow-inner app-input"
           oninput="handleSearch(this.value)"
         />
         <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs md:text-sm">
@@ -80,7 +85,7 @@
     </div>
 
     <!-- Filter Layanan Rel (Pills Horisontal) -->
-    <div class="px-3 py-2.5 border-b border-white/5 bg-[#060911]/60">
+    <div class="px-3 py-2.5 border-b border-white/5 filter-pills-bar">
       <div class="slide-nav flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
         <button onclick="filterCategory('all', this)" class="category-pill active" data-cat="all">Semua</button>
         <button onclick="filterCategory('antarkota', this)" class="category-pill" data-cat="antarkota">Antarkota</button>
@@ -95,11 +100,11 @@
     </div>
 
     <!-- Dropdown Wilayah & Status Bar -->
-    <div class="px-3.5 py-2.5 border-b border-white/5 flex items-center justify-between gap-2 bg-[#080c14]/50">
+    <div class="px-3.5 py-2.5 border-b border-white/5 flex items-center justify-between gap-2 region-select-bar">
       <select 
         id="regionSelect" 
         onchange="handleRegionSelect(this.value)"
-        class="bg-slate-900 border border-white/10 text-slate-200 text-xs md:text-sm rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500 flex-1 truncate"
+        class="text-xs md:text-sm rounded-lg px-2.5 py-1.5 focus:outline-none flex-1 truncate app-select"
       >
         <option value="ALL">Semua Koridor Wilayah</option>
         <optgroup label="Layanan Komuter & Lokal">
@@ -128,7 +133,7 @@
           <option value="Divre IV Tanjungkarang">Divre IV Tanjungkarang</option>
         </optgroup>
       </select>
-      <span id="stationCountDisplay" class="text-xs md:text-sm font-mono text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-lg shrink-0 font-bold">0 Titik</span>
+      <span id="stationCountDisplay" class="text-xs md:text-sm font-mono text-amber-500 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-lg shrink-0 font-bold">0 Titik</span>
     </div>
 
     <!-- Station Directory List (Minimalis & Jelas) -->
@@ -137,11 +142,11 @@
     </div>
 
     <!-- Quick Footer Links -->
-    <div class="p-3 bg-[#060a12] border-t border-white/5 flex gap-2 shrink-0 text-xs md:text-sm">
-      <a href="https://wa.me/6281112111121" target="_blank" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-600/90 hover:bg-emerald-600 text-white rounded-xl transition font-medium shadow-sm">
+    <div class="p-3 border-t border-white/5 flex gap-2 shrink-0 text-xs md:text-sm app-footer-bar">
+      <a href="https://wa.me/6281112111121" target="_blank" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition font-medium shadow-sm">
         <i class="fa-brands fa-whatsapp text-sm md:text-base"></i> CS 121
       </a>
-      <a href="https://booking.kai.id" target="_blank" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-orange-600/90 hover:bg-orange-600 text-white rounded-xl transition font-medium shadow-sm">
+      <a href="https://booking.kai.id" target="_blank" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl transition font-medium shadow-sm">
         <i class="fa-solid fa-ticket text-xs md:text-sm"></i> Access KAI
       </a>
     </div>
@@ -157,142 +162,148 @@
     <!-- FLOATING RIGHT CONTROLS BAR -->
     <div id="rightControlsBar" class="absolute top-3.5 right-3.5 z-[1050] flex flex-col items-end gap-2">
       <div class="flex items-center gap-1.5 sm:gap-2">
+        <!-- Tombol Pengalih Mode Siang / Malam -->
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="px-3.5 py-2 rounded-xl shadow-2xl backdrop-blur-xl flex items-center gap-1.5 text-xs md:text-sm font-semibold active:scale-95 transition app-floating-btn" title="Ganti Mode Tampilan (Siang / Malam)">
+          <i id="themeIcon" class="fa-solid fa-sun text-amber-500"></i>
+          <span id="themeLabel" class="hidden sm:inline">Mode Siang</span>
+        </button>
+
         <!-- Tombol Filter Jalur KA Interaktif -->
-        <button onclick="toggleRouteMenu(event)" class="px-3.5 py-2 bg-[#0d1322]/95 hover:bg-slate-800 text-slate-200 border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl flex items-center gap-1.5 text-xs md:text-sm font-semibold active:scale-95 transition" title="Pilih Jalur Rel & Rute Operasi">
-          <i class="fa-solid fa-route text-orange-400"></i>
+        <button onclick="toggleRouteMenu(event)" class="px-3.5 py-2 rounded-xl shadow-2xl backdrop-blur-xl flex items-center gap-1.5 text-xs md:text-sm font-semibold active:scale-95 transition app-floating-btn" title="Pilih Jalur Rel & Rute Operasi">
+          <i class="fa-solid fa-route text-orange-500"></i>
           <span class="hidden sm:inline">Pilih Jalur</span>
-          <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+          <i class="fa-solid fa-chevron-down text-[10px] opacity-70"></i>
         </button>
 
         <!-- Tombol Buka/Tutup Info Detail -->
-        <button id="toggleDetailBtn" onclick="toggleStationDrawer()" class="px-3.5 py-2 bg-[#0d1322]/95 hover:bg-slate-800 text-slate-200 border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl flex items-center gap-1.5 text-xs md:text-sm font-semibold active:scale-95 transition" title="Buka / Tutup Detail Stasiun">
-          <i class="fa-solid fa-circle-info text-amber-400"></i>
+        <button id="toggleDetailBtn" onclick="toggleStationDrawer()" class="px-3.5 py-2 rounded-xl shadow-2xl backdrop-blur-xl flex items-center gap-1.5 text-xs md:text-sm font-semibold active:scale-95 transition app-floating-btn" title="Buka / Tutup Detail Stasiun">
+          <i class="fa-solid fa-circle-info text-amber-500"></i>
           <span class="hidden sm:inline">Info Detail</span>
         </button>
 
         <!-- Tombol Mode Peta Basemap -->
-        <button onclick="toggleLayerMenu(event)" class="px-3.5 py-2 bg-[#0d1322]/95 hover:bg-slate-800 text-slate-200 border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl flex items-center gap-1.5 text-xs md:text-sm font-semibold active:scale-95 transition" title="Pilihan Tampilan Peta">
-          <i class="fa-solid fa-layer-group text-amber-400"></i>
+        <button onclick="toggleLayerMenu(event)" class="px-3.5 py-2 rounded-xl shadow-2xl backdrop-blur-xl flex items-center gap-1.5 text-xs md:text-sm font-semibold active:scale-95 transition app-floating-btn" title="Pilihan Tampilan Peta">
+          <i class="fa-solid fa-layer-group text-amber-500"></i>
           <span class="hidden sm:inline">Mode Peta</span>
-          <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+          <i class="fa-solid fa-chevron-down text-[10px] opacity-70"></i>
         </button>
 
         <!-- Tombol Reset Zoom Peta -->
-        <button onclick="resetMapView()" class="w-9 h-9 md:w-10 md:h-10 bg-[#0d1322]/95 hover:bg-slate-800 text-slate-200 border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl flex items-center justify-center text-xs md:text-sm active:scale-95 transition" title="Reset Pandangan Jawa & Sumatera">
-          <i class="fa-solid fa-compress text-amber-400"></i>
+        <button onclick="resetMapView()" class="w-9 h-9 md:w-10 md:h-10 rounded-xl shadow-2xl backdrop-blur-xl flex items-center justify-center text-xs md:text-sm active:scale-95 transition app-floating-btn" title="Reset Pandangan Jawa & Sumatera">
+          <i class="fa-solid fa-compress text-amber-500"></i>
         </button>
       </div>
 
       <!-- DROPDOWN FILTER JALUR / RUTE (INTERAKTIF) -->
-      <div id="routeMenuDropdown" class="hidden w-72 sm:w-80 bg-[#0d1322]/98 backdrop-blur-2xl border border-white/10 rounded-2xl p-3.5 shadow-2xl text-xs md:text-sm space-y-2.5 z-[1060] max-h-[75vh] overflow-y-auto custom-scrollbar">
-        <div class="flex items-center justify-between pb-1.5 border-b border-white/5">
-          <span class="font-bold text-slate-200 flex items-center gap-1.5">
-            <i class="fa-solid fa-code-fork text-orange-400"></i> Jalur Rel Operasional
+      <div id="routeMenuDropdown" class="hidden w-72 sm:w-80 backdrop-blur-2xl rounded-2xl p-3.5 shadow-2xl text-xs md:text-sm space-y-2.5 z-[1060] max-h-[75vh] overflow-y-auto custom-scrollbar app-dropdown-menu">
+        <div class="flex items-center justify-between pb-1.5 border-b dropdown-divider">
+          <span class="font-bold flex items-center gap-1.5 dropdown-header-title">
+            <i class="fa-solid fa-code-fork text-orange-500"></i> Jalur Rel Operasional
           </span>
-          <button onclick="toggleAllRoutes(true)" class="text-[10px] text-amber-400 hover:underline">Semua</button>
+          <button onclick="toggleAllRoutes(true)" class="text-[11px] text-amber-500 font-semibold hover:underline">Aktifkan Semua</button>
         </div>
 
         <div class="space-y-1.5 text-xs">
           <!-- Whoosh -->
-          <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 hover:bg-slate-800/80 cursor-pointer border border-white/5 transition">
-            <span class="flex items-center gap-2 text-slate-200">
+          <label class="flex items-center justify-between p-2 rounded-xl cursor-pointer transition route-item-label">
+            <span class="flex items-center gap-2">
               <span class="w-3 h-3 rounded-full bg-red-600 inline-block shadow"></span>
-              <span>KCIC Whoosh Cepat</span>
+              <span class="font-medium">KCIC Whoosh Cepat</span>
             </span>
             <input type="checkbox" id="route-whoosh" checked onchange="toggleRouteLayer('whoosh', this.checked)" class="rounded text-red-500">
           </label>
 
           <!-- Antarkota Utara -->
-          <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 hover:bg-slate-800/80 cursor-pointer border border-white/5 transition">
-            <span class="flex items-center gap-2 text-slate-200">
+          <label class="flex items-center justify-between p-2 rounded-xl cursor-pointer transition route-item-label">
+            <span class="flex items-center gap-2">
               <span class="w-3 h-3 rounded-full bg-blue-500 inline-block shadow"></span>
-              <span>KA Antarkota (Lintas Pantura)</span>
+              <span class="font-medium">KA Antarkota (Lintas Pantura)</span>
             </span>
             <input type="checkbox" id="route-antarkota-utara" checked onchange="toggleRouteLayer('antarkota-utara', this.checked)" class="rounded text-blue-500">
           </label>
 
           <!-- Antarkota Selatan -->
-          <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 hover:bg-slate-800/80 cursor-pointer border border-white/5 transition">
-            <span class="flex items-center gap-2 text-slate-200">
+          <label class="flex items-center justify-between p-2 rounded-xl cursor-pointer transition route-item-label">
+            <span class="flex items-center gap-2">
               <span class="w-3 h-3 rounded-full bg-indigo-500 inline-block shadow"></span>
-              <span>KA Antarkota (Lintas Selatan)</span>
+              <span class="font-medium">KA Antarkota (Lintas Selatan)</span>
             </span>
             <input type="checkbox" id="route-antarkota-selatan" checked onchange="toggleRouteLayer('antarkota-selatan', this.checked)" class="rounded text-indigo-500">
           </label>
 
           <!-- KRL Jabodetabek -->
-          <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 hover:bg-slate-800/80 cursor-pointer border border-white/5 transition">
-            <span class="flex items-center gap-2 text-slate-200">
-              <span class="w-3 h-3 rounded-full bg-cyan-400 inline-block shadow"></span>
-              <span>KRL Commuter Jabodetabek</span>
+          <label class="flex items-center justify-between p-2 rounded-xl cursor-pointer transition route-item-label">
+            <span class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-cyan-500 inline-block shadow"></span>
+              <span class="font-medium">KRL Commuter Jabodetabek</span>
             </span>
-            <input type="checkbox" id="route-krl-jabodetabek" checked onchange="toggleRouteLayer('krl-jabodetabek', this.checked)" class="rounded text-cyan-400">
+            <input type="checkbox" id="route-krl-jabodetabek" checked onchange="toggleRouteLayer('krl-jabodetabek', this.checked)" class="rounded text-cyan-500">
           </label>
 
           <!-- KRL Solo - Yogya -->
-          <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 hover:bg-slate-800/80 cursor-pointer border border-white/5 transition">
-            <span class="flex items-center gap-2 text-slate-200">
-              <span class="w-3 h-3 rounded-full bg-emerald-400 inline-block shadow"></span>
-              <span>KRL Yogyakarta–Solo–Palur</span>
+          <label class="flex items-center justify-between p-2 rounded-xl cursor-pointer transition route-item-label">
+            <span class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block shadow"></span>
+              <span class="font-medium">KRL Yogyakarta–Solo–Palur</span>
             </span>
-            <input type="checkbox" id="route-krl-jogja" checked onchange="toggleRouteLayer('krl-jogja', this.checked)" class="rounded text-emerald-400">
+            <input type="checkbox" id="route-krl-jogja" checked onchange="toggleRouteLayer('krl-jogja', this.checked)" class="rounded text-emerald-500">
           </label>
 
           <!-- KA Lokal Commuter Line Bandung Raya & Garut -->
-          <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 hover:bg-slate-800/80 cursor-pointer border border-white/5 transition">
-            <span class="flex items-center gap-2 text-slate-200">
-              <span class="w-3 h-3 rounded-full bg-amber-400 inline-block shadow"></span>
-              <span>Lokal KCI Bandung & Garut</span>
+          <label class="flex items-center justify-between p-2 rounded-xl cursor-pointer transition route-item-label">
+            <span class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-amber-500 inline-block shadow"></span>
+              <span class="font-medium">Lokal KCI Bandung & Garut</span>
             </span>
-            <input type="checkbox" id="route-lokal-bandung" checked onchange="toggleRouteLayer('lokal-bandung', this.checked)" class="rounded text-amber-400">
+            <input type="checkbox" id="route-lokal-bandung" checked onchange="toggleRouteLayer('lokal-bandung', this.checked)" class="rounded text-amber-500">
           </label>
 
           <!-- KA Lokal Commuter Line Dhoho - Penataran Jatim -->
-          <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 hover:bg-slate-800/80 cursor-pointer border border-white/5 transition">
-            <span class="flex items-center gap-2 text-slate-200">
-              <span class="w-3 h-3 rounded-full bg-yellow-400 inline-block shadow"></span>
-              <span>Lokal KCI Jatim (Dhoho & Penataran)</span>
+          <label class="flex items-center justify-between p-2 rounded-xl cursor-pointer transition route-item-label">
+            <span class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block shadow"></span>
+              <span class="font-medium">Lokal KCI Jatim (Dhoho & Penataran)</span>
             </span>
-            <input type="checkbox" id="route-lokal-jatim" checked onchange="toggleRouteLayer('lokal-jatim', this.checked)" class="rounded text-yellow-400">
+            <input type="checkbox" id="route-lokal-jatim" checked onchange="toggleRouteLayer('lokal-jatim', this.checked)" class="rounded text-yellow-500">
           </label>
 
           <!-- KA Lokal KAI: Pangrango & Siliwangi -->
-          <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 hover:bg-slate-800/80 cursor-pointer border border-white/5 transition">
-            <span class="flex items-center gap-2 text-slate-200">
-              <span class="w-3 h-3 rounded-full bg-purple-400 inline-block shadow"></span>
-              <span>Lokal KAI: Pangrango & Siliwangi</span>
+          <label class="flex items-center justify-between p-2 rounded-xl cursor-pointer transition route-item-label">
+            <span class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-purple-500 inline-block shadow"></span>
+              <span class="font-medium">Lokal KAI: Pangrango & Siliwangi</span>
             </span>
-            <input type="checkbox" id="route-lokal-kai" checked onchange="toggleRouteLayer('lokal-kai', this.checked)" class="rounded text-purple-400">
+            <input type="checkbox" id="route-lokal-kai" checked onchange="toggleRouteLayer('lokal-kai', this.checked)" class="rounded text-purple-500">
           </label>
         </div>
       </div>
 
       <!-- DROPDOWN BASEMAP KARTOGRAFI -->
-      <div id="layerMenuDropdown" class="hidden w-64 sm:w-72 bg-[#0d1322]/98 backdrop-blur-2xl border border-white/10 rounded-2xl p-3.5 shadow-2xl text-xs md:text-sm space-y-2 z-[1060]">
-        <div class="text-[11px] md:text-xs font-bold uppercase tracking-wider text-slate-400 pb-1 border-b border-white/5">
+      <div id="layerMenuDropdown" class="hidden w-64 sm:w-72 backdrop-blur-2xl rounded-2xl p-3.5 shadow-2xl text-xs md:text-sm space-y-2 z-[1060] app-dropdown-menu">
+        <div class="text-[11px] md:text-xs font-bold uppercase tracking-wider pb-1 border-b dropdown-divider">
           Pilihan Kartografi Peta
         </div>
-        <!-- Mode Gelap Fokus Rel Esri (Lengkap Garis Pantai, Bebas Blank & Bebas API Key) -->
-        <button onclick="setBaseMap('esri-dark')" id="btn-esri-dark" class="w-full p-2.5 rounded-xl border text-left flex items-center justify-between bg-amber-500/10 border-amber-500/50 text-amber-300 font-bold transition">
+        <!-- Pilihan Mode Esri Kanvas Sesuai Tema -->
+        <button onclick="setBaseMap('canvas-theme')" id="btn-canvas-theme" class="w-full p-2.5 rounded-xl border text-left flex items-center justify-between transition app-basemap-active">
           <div>
-            <span class="flex items-center gap-1.5"><i class="fa-solid fa-moon text-amber-400"></i> Fokus Rel Murni (Gelap GIS)</span>
-            <span class="text-[10px] md:text-xs text-slate-400 block font-normal mt-0.5">Kontur daratan & pantai jelas, bebas polusi jalan</span>
+            <span class="flex items-center gap-1.5 font-bold"><i class="fa-solid fa-map text-amber-500"></i> Fokus Rel Murni (Kanvas)</span>
+            <span class="text-[10px] md:text-xs block font-normal mt-0.5 opacity-80" id="canvasThemeDesc">Menyesuaikan mode siang/malam otomatis</span>
           </div>
-          <i class="fa-solid fa-check text-amber-400" id="check-esri-dark"></i>
+          <i class="fa-solid fa-check text-amber-500" id="check-canvas-theme"></i>
         </button>
         <div class="grid grid-cols-2 gap-1.5">
-          <button onclick="setBaseMap('osm')" id="btn-osm" class="p-2 border border-white/10 bg-slate-900/80 rounded-xl text-left hover:bg-slate-800 transition">
-            <span class="font-medium block text-slate-200">Standar OSM</span>
-            <span class="text-[10px] text-slate-400">Peta Jalan</span>
+          <button onclick="setBaseMap('osm')" id="btn-osm" class="p-2 border rounded-xl text-left transition app-basemap-btn">
+            <span class="font-medium block">Standar OSM</span>
+            <span class="text-[10px] opacity-70">Peta Jalan</span>
           </button>
-          <button onclick="setBaseMap('satellite')" id="btn-satellite" class="p-2 border border-white/10 bg-slate-900/80 rounded-xl text-left hover:bg-slate-800 transition">
-            <span class="font-medium block text-slate-200">Satelit</span>
-            <span class="text-[10px] text-slate-400">Citra Esri</span>
+          <button onclick="setBaseMap('satellite')" id="btn-satellite" class="p-2 border rounded-xl text-left transition app-basemap-btn">
+            <span class="font-medium block">Satelit</span>
+            <span class="text-[10px] opacity-70">Citra Esri</span>
           </button>
         </div>
-        <div class="pt-2 border-t border-white/5">
-          <label class="flex items-center justify-between cursor-pointer text-xs md:text-sm text-slate-300">
-            <span><i class="fa-solid fa-code-fork text-orange-400 mr-1.5"></i> Overlay OpenRailwayMap</span>
+        <div class="pt-2 border-t dropdown-divider">
+          <label class="flex items-center justify-between cursor-pointer text-xs md:text-sm font-medium">
+            <span><i class="fa-solid fa-code-fork text-orange-500 mr-1.5"></i> Overlay OpenRailwayMap</span>
             <input type="checkbox" id="railOverlayToggle" checked onchange="toggleRailOverlay(this.checked)" class="rounded text-amber-500">
           </label>
         </div>
@@ -300,30 +311,30 @@
     </div>
 
     <!-- DRAWER DETAIL STASIUN (RESPONSIF DENGAN HURUF BESAR JELAS DI PC) -->
-    <div id="stationDrawer" class="station-sheet fixed md:absolute bottom-0 md:top-0 right-0 w-full md:w-[440px] max-h-[85vh] md:max-h-full h-auto md:h-full bg-[#0d1322]/98 backdrop-blur-2xl shadow-2xl z-[1100] border-t md:border-t-0 md:border-l border-white/10 flex flex-col rounded-t-3xl md:rounded-none overflow-hidden">
+    <div id="stationDrawer" class="station-sheet fixed md:absolute bottom-0 md:top-0 right-0 w-full md:w-[440px] max-h-[85vh] md:max-h-full h-auto md:h-full backdrop-blur-2xl shadow-2xl z-[1100] border-t md:border-t-0 md:border-l flex flex-col rounded-t-3xl md:rounded-none overflow-hidden app-drawer">
       <!-- Drag Handle for Mobile Sheet -->
       <div class="md:hidden flex justify-center pt-2.5 pb-1 cursor-grab" onclick="closeStationDrawer()">
-        <div class="w-12 h-1.5 rounded-full bg-slate-700"></div>
+        <div class="w-12 h-1.5 rounded-full bg-slate-400/60"></div>
       </div>
 
       <!-- Header Drawer -->
-      <div class="p-4 md:p-5 bg-gradient-to-r from-[#111827] to-[#0d1322] border-b border-white/5 flex justify-between items-center shrink-0">
+      <div class="p-4 md:p-5 border-b flex justify-between items-center shrink-0 app-drawer-header">
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span id="drawerBadgeType" class="text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase">TIPE</span>
             <span id="drawerBadgeStatus" class="text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase">STATUS</span>
           </div>
-          <h2 id="drawerTitle" class="font-extrabold text-base md:text-lg text-white leading-tight">Nama Stasiun</h2>
+          <h2 id="drawerTitle" class="font-extrabold text-base md:text-lg leading-tight drawer-header-title">Nama Stasiun</h2>
         </div>
-        <button onclick="closeStationDrawer()" class="w-9 h-9 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+        <button onclick="closeStationDrawer()" class="w-9 h-9 rounded-full flex items-center justify-center transition app-close-btn">
           <i class="fa-solid fa-xmark text-base"></i>
         </button>
       </div>
 
-      <!-- Isi Informasi Stasiun (Ukuran Tulisan Jelas di PC) -->
-      <div class="flex-1 overflow-y-auto p-4 md:p-5 space-y-4 custom-scrollbar text-slate-200">
+      <!-- Isi Informasi Stasiun -->
+      <div class="flex-1 overflow-y-auto p-4 md:p-5 space-y-4 custom-scrollbar drawer-content-body">
         <!-- Foto Dokumentasi -->
-        <div class="rounded-2xl overflow-hidden border border-white/10 relative bg-slate-950 h-48 md:h-52 group shrink-0">
+        <div class="rounded-2xl overflow-hidden border relative bg-slate-950 h-48 md:h-52 group shrink-0 drawer-image-frame">
           <img 
             id="drawerImage" 
             src="" 
@@ -331,44 +342,44 @@
             class="w-full h-full object-cover transition duration-300 group-hover:scale-105"
             onerror="this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80'"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
           <div class="absolute bottom-3 left-3.5">
             <span class="text-white font-bold text-sm md:text-base block drop-shadow" id="drawerCity">Kota / Wilayah</span>
             <p class="text-xs md:text-sm text-amber-400 font-mono font-semibold" id="drawerElevation">- mdpl</p>
           </div>
-          <span class="absolute top-2.5 right-2.5 text-[10px] md:text-xs font-mono bg-black/80 px-2.5 py-1 rounded-md text-slate-300 border border-white/10" id="drawerYears">
+          <span class="absolute top-2.5 right-2.5 text-[10px] md:text-xs font-mono bg-black/80 px-2.5 py-1 rounded-md text-slate-200 border border-white/20" id="drawerYears">
             Operasional
           </span>
         </div>
 
         <!-- Ulasan & Karakteristik Operasional -->
-        <div id="drawerReviewBox" class="p-4 rounded-2xl border border-white/10 bg-slate-900/60 transition">
-          <span id="drawerReviewTitle" class="font-bold flex items-center gap-2 mb-2 text-xs md:text-sm text-amber-400">
+        <div id="drawerReviewBox" class="p-4 rounded-2xl border transition drawer-box">
+          <span id="drawerReviewTitle" class="font-bold flex items-center gap-2 mb-2 text-xs md:text-sm text-amber-500">
             <i class="fa-solid fa-circle-info"></i> Karakteristik Operasional & Jalur:
           </span>
-          <p id="drawerReview" class="leading-relaxed text-xs md:text-sm text-slate-200 font-normal">-</p>
+          <p id="drawerReview" class="leading-relaxed text-xs md:text-sm font-normal drawer-text">-</p>
         </div>
 
         <!-- Fasilitas Penumpang -->
         <div>
-          <span class="font-bold text-slate-300 block mb-2 text-xs md:text-sm" id="drawerFacilitiesLabel">Fasilitas Penumpang:</span>
+          <span class="font-bold block mb-2 text-xs md:text-sm drawer-subtitle" id="drawerFacilitiesLabel">Fasilitas Penumpang:</span>
           <div id="drawerFacilities" class="grid grid-cols-2 gap-2"></div>
         </div>
 
         <!-- Panduan Akses Lokasi -->
-        <div class="border border-white/10 rounded-2xl p-4 bg-slate-900/80">
-          <span class="font-bold text-slate-200 block mb-1.5 text-xs md:text-sm">
-            <i class="fa-solid fa-map-location-dot text-amber-400 mr-1.5"></i> Lokasi & Akses:
+        <div class="border rounded-2xl p-4 drawer-box">
+          <span class="font-bold block mb-1.5 text-xs md:text-sm drawer-subtitle">
+            <i class="fa-solid fa-map-location-dot text-amber-500 mr-1.5"></i> Lokasi & Akses:
           </span>
-          <p id="drawerLayoutGuide" class="text-slate-300 leading-relaxed text-xs md:text-sm mb-3">-</p>
-          <a id="drawerLayoutLink" href="#" target="_blank" class="inline-flex items-center gap-1.5 text-xs md:text-sm text-amber-400 font-semibold hover:underline">
+          <p id="drawerLayoutGuide" class="leading-relaxed text-xs md:text-sm mb-3 drawer-text">-</p>
+          <a id="drawerLayoutLink" href="#" target="_blank" class="inline-flex items-center gap-1.5 text-xs md:text-sm text-amber-500 font-semibold hover:underline">
             Buka Navigasi di Google Maps <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
           </a>
         </div>
       </div>
 
       <!-- Action Footer Drawer -->
-      <div class="p-3.5 md:p-4 bg-[#0b0f19] border-t border-white/5 space-y-2 shrink-0 text-xs md:text-sm">
+      <div class="p-3.5 md:p-4 border-t space-y-2 shrink-0 text-xs md:text-sm app-drawer-footer">
         <a id="drawerTicketBtn" href="https://booking.kai.id" target="_blank" class="block w-full py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-center font-bold rounded-xl shadow-lg transition">
           <i class="fa-solid fa-ticket mr-1.5"></i> Cek Tiket di Access by KAI
         </a>
@@ -376,7 +387,7 @@
           <a href="https://wa.me/6281112111121" target="_blank" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-center font-semibold rounded-xl transition">
             Hubungi CS 121
           </a>
-          <button onclick="closeStationDrawer()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition">
+          <button onclick="closeStationDrawer()" class="px-5 py-2 rounded-xl font-semibold transition app-secondary-btn">
             Tutup
           </button>
         </div>
