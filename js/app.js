@@ -1,17 +1,21 @@
 /**
  * KAI GIS CS & HERITAGE EXPLORER CONTROLLER
- * Versi 4.4 - Esri Dark GIS (Bebas API Key), Interactive Route Polylines & High-Legibility PC UI
+ * Versi 4.5 - Dual-Theme Mode (Siang & Malam), Route Polylines & High-Legibility Typography
  */
 
 let map;
 let currentBaseLayer = null;
 let railwayOverlayLayer = null;
+let currentBasemapType = 'canvas-theme';
 let stationMarkers = [];
 let routeLayers = {};
 let activeStationId = null;
 let currentCategory = 'all';
 let currentRegion = 'ALL';
 let searchQuery = '';
+
+// Pengaturan Tema Default / Mengambil dari Penyimpanan Lokal
+let currentTheme = localStorage.getItem('kai_gis_theme') || 'dark';
 
 // Warna Pin Stasiun
 const PIN_COLORS = {
@@ -37,12 +41,15 @@ const PIN_ICONS = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Terapkan tema awal
+  applyTheme(currentTheme, false);
+
   initMap();
   initRailwayRoutes();
   renderStationDirectory();
   updateStationMarkers();
 
-  // Cegah interaksi panel navigasi dan drawer tembus ke peta Leaflet
+  // Cegah interaksi dropdown dan drawer tembus ke peta Leaflet
   const rightControls = document.getElementById('rightControlsBar');
   if (rightControls) {
     L.DomEvent.disableClickPropagation(rightControls);
@@ -61,11 +68,62 @@ document.addEventListener('DOMContentLoaded', () => {
     L.DomEvent.disableScrollPropagation(routeDropdown);
   }
 
+  const layerDropdown = document.getElementById('layerMenuDropdown');
+  if (layerDropdown) {
+    L.DomEvent.disableClickPropagation(layerDropdown);
+    L.DomEvent.disableScrollPropagation(layerDropdown);
+  }
+
   // Pada PC (Layar Lebar), tampilkan stasiun pertama secara otomatis
   if (window.innerWidth >= 1024 && typeof STATIONS_DATA !== 'undefined' && STATIONS_DATA.length > 0) {
     selectStation(STATIONS_DATA[0].id, false);
   }
 });
+
+// ========================================================
+// SISTEM MODE SIANG / MALAM (THEME SWITCHER)
+// ========================================================
+function toggleTheme() {
+  const newTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+  applyTheme(newTheme, true);
+}
+
+function applyTheme(theme, updateBasemap = true) {
+  currentTheme = theme;
+  localStorage.setItem('kai_gis_theme', theme);
+
+  const body = document.getElementById('appBody');
+  const themeIcon = document.getElementById('themeIcon');
+  const themeLabel = document.getElementById('themeLabel');
+  const themeIconMobile = document.getElementById('themeIconMobile');
+  const canvasDesc = document.getElementById('canvasThemeDesc');
+
+  if (theme === 'light') {
+    body.classList.remove('theme-dark');
+    body.classList.add('theme-light');
+
+    if (themeIcon) themeIcon.className = 'fa-solid fa-moon text-indigo-600';
+    if (themeLabel) themeLabel.innerText = 'Mode Malam';
+    if (themeIconMobile) themeIconMobile.className = 'fa-solid fa-moon text-indigo-600';
+    if (canvasDesc) canvasDesc.innerText = 'Esri Light Canvas (Mode Siang Terang)';
+  } else {
+    body.classList.remove('theme-light');
+    body.classList.add('theme-dark');
+
+    if (themeIcon) themeIcon.className = 'fa-solid fa-sun text-amber-500';
+    if (themeLabel) themeLabel.innerText = 'Mode Siang';
+    if (themeIconMobile) themeIconMobile.className = 'fa-solid fa-sun text-amber-500';
+    if (canvasDesc) canvasDesc.innerText = 'Esri Dark Canvas (Mode Malam Gelap)';
+  }
+
+  // Jika basemap saat ini adalah jenis kanvas tema, perbarui lapisannya
+  if (updateBasemap && map && currentBasemapType === 'canvas-theme') {
+    setBaseMap('canvas-theme');
+  }
+
+  // Render ulang direktori stasiun agar kartu mendapat gaya kelas tema yang tepat
+  renderStationDirectory();
+}
 
 // Inisialisasi Peta Leaflet
 function initMap() {
@@ -78,19 +136,19 @@ function initMap() {
 
   L.control.attribution({
     position: 'bottomright',
-    prefix: '<span class="text-[10px] text-slate-400">KAI GIS • Esri Canvas & OpenRailwayMap</span>'
+    prefix: '<span class="text-[10px] opacity-75">KAI GIS • OpenRailwayMap Live</span>'
   }).addTo(map);
-
-  // Default Basemap: Esri Dark Gray Canvas (Menampilkan pulau, laut, batas wilayah jelas tanpa jalan raya & bebas API Key)
-  setBaseMap('esri-dark');
 
   // Layer Rel OpenRailwayMap Standar
   railwayOverlayLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
     maxZoom: 19,
     subdomains: ['a', 'b', 'c'],
-    opacity: 0.85
+    opacity: 0.88
   });
   railwayOverlayLayer.addTo(map);
+
+  // Pasang basemap awal sesuai tema aktif
+  setBaseMap('canvas-theme');
 
   map.on('click', () => {
     closeLayerMenu();
@@ -98,7 +156,7 @@ function initMap() {
   });
 }
 
-// Inisialisasi Polylines Jalur KA Interaktif
+// Polylines Jalur KA Interaktif
 function initRailwayRoutes() {
   if (typeof RAILWAY_ROUTES === 'undefined') return;
 
@@ -126,7 +184,7 @@ function initRailwayRoutes() {
   });
 }
 
-// Toggle Masing-Masing Jalur Rel
+// Toggle Jalur Rel
 function toggleRouteLayer(key, isChecked) {
   if (!routeLayers[key]) return;
   if (isChecked) {
@@ -140,7 +198,6 @@ function toggleRouteLayer(key, isChecked) {
   }
 }
 
-// Toggle Seluruh Jalur
 function toggleAllRoutes(forceState) {
   Object.keys(routeLayers).forEach(key => {
     const checkbox = document.getElementById(`route-${key}`);
@@ -149,50 +206,57 @@ function toggleAllRoutes(forceState) {
   });
 }
 
-// Mode Basemap Kartografi
+// Basemap Switcher (Mendukung Kanvas Siang & Kanvas Malam)
 function setBaseMap(type) {
+  currentBasemapType = type;
+
   if (currentBaseLayer) {
     map.removeLayer(currentBaseLayer);
     currentBaseLayer = null;
   }
 
-  ['esri-dark', 'osm', 'satellite'].forEach(id => {
+  // Reset kelas tombol basemap
+  ['canvas-theme', 'osm', 'satellite'].forEach(id => {
     const btn = document.getElementById(`btn-${id}`);
     const chk = document.getElementById(`check-${id}`);
-    if (btn) btn.className = 'w-full p-2 border border-white/10 bg-slate-900/80 rounded-xl text-left hover:bg-slate-800 transition text-slate-300';
+    if (btn) {
+      btn.classList.remove('app-basemap-active');
+      btn.classList.add('app-basemap-btn');
+    }
     if (chk) chk.classList.add('hidden');
   });
 
-  if (type === 'esri-dark') {
-    // Esri Dark Gray Canvas: Memiliki garis pantai & pulau lengkap tanpa polusi jalan / gedung (Bebas API Key)
-    currentBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 16
-    });
+  if (type === 'canvas-theme') {
+    // Mode Kanvas Bersih: Di Mode Malam memakai Dark Gray, di Mode Siang memakai Light Gray
+    const esriUrl = (currentTheme === 'light')
+      ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+      : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+
+    currentBaseLayer = L.tileLayer(esriUrl, { maxZoom: 16 });
     currentBaseLayer.addTo(map);
 
-    const btn = document.getElementById('btn-esri-dark');
-    const chk = document.getElementById('check-esri-dark');
-    if (btn) btn.className = 'w-full p-2.5 rounded-xl border text-left flex items-center justify-between bg-amber-500/10 border-amber-500/50 text-amber-300 font-bold transition';
+    const btn = document.getElementById('btn-canvas-theme');
+    const chk = document.getElementById('check-canvas-theme');
+    if (btn) {
+      btn.classList.remove('app-basemap-btn');
+      btn.classList.add('app-basemap-active');
+    }
     if (chk) chk.classList.remove('hidden');
 
   } else if (type === 'osm') {
-    currentBaseLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
-    });
+    currentBaseLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
     currentBaseLayer.addTo(map);
     const btn = document.getElementById('btn-osm');
-    if (btn) btn.className = 'p-2 border border-amber-500/50 bg-amber-500/10 rounded-xl text-left text-amber-300 font-bold transition';
+    if (btn) btn.classList.add('app-basemap-active');
 
   } else if (type === 'satellite') {
-    currentBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 19
-    });
+    currentBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
     currentBaseLayer.addTo(map);
     const btn = document.getElementById('btn-satellite');
-    if (btn) btn.className = 'p-2 border border-amber-500/50 bg-amber-500/10 rounded-xl text-left text-amber-300 font-bold transition';
+    if (btn) btn.classList.add('app-basemap-active');
   }
 
-  // Pastikan layer rel dan polyline tetap berada di atas basemap
+  // Pastikan overlay rel dan rute berada di depan basemap
   if (railwayOverlayLayer && map.hasLayer(railwayOverlayLayer)) {
     railwayOverlayLayer.bringToFront();
   }
@@ -203,7 +267,6 @@ function setBaseMap(type) {
   });
 }
 
-// Toggle Overlay Rel OpenRailwayMap
 function toggleRailOverlay(checked) {
   if (checked) {
     if (!map.hasLayer(railwayOverlayLayer)) {
@@ -217,7 +280,7 @@ function toggleRailOverlay(checked) {
   }
 }
 
-// Kontrol Dropdown Menu
+// Kontrol Dropdown
 function toggleRouteMenu(event) {
   if (event) event.stopPropagation();
   closeLayerMenu();
@@ -251,7 +314,7 @@ function resetMapView() {
   map.flyTo([-7.25, 110.15], 7, { duration: 1.0 });
 }
 
-// Filter Stasiun
+// Filter Data
 function getFilteredStations() {
   if (typeof STATIONS_DATA === 'undefined') return [];
   return STATIONS_DATA.filter(station => {
@@ -268,7 +331,6 @@ function getFilteredStations() {
   });
 }
 
-// Render Pin di Peta
 function updateStationMarkers() {
   stationMarkers.forEach(m => map.removeLayer(m));
   stationMarkers = [];
@@ -296,7 +358,7 @@ function updateStationMarkers() {
       selectStation(station.id, true);
     });
 
-    marker.bindTooltip(`<b>${station.name}</b> (${station.code})<br><span style="font-size:11px; color:#cbd5e1;">${station.type}</span>`, {
+    marker.bindTooltip(`<b>${station.name}</b> (${station.code})<br><span style="font-size:11px; opacity:0.9;">${station.type}</span>`, {
       direction: 'top',
       offset: [0, -14],
       className: 'bg-slate-900 text-white rounded-lg px-2.5 py-1.5 border border-white/10 text-xs shadow-xl'
@@ -312,7 +374,7 @@ function updateStationMarkers() {
   }
 }
 
-// Render Panel Direktori Kiri (Rapi, Luas, Tipografi Nyaman)
+// Render Direktori Kiri Sesuai Tema
 function renderStationDirectory() {
   const container = document.getElementById('stationListContainer');
   if (!container) return;
@@ -330,6 +392,8 @@ function renderStationDirectory() {
     return;
   }
 
+  const isLight = (currentTheme === 'light');
+
   stations.forEach(station => {
     const isSelected = (station.id === activeStationId);
     const pinColor = PIN_COLORS[station.category] || '#f59e0b';
@@ -343,11 +407,16 @@ function renderStationDirectory() {
       }
     };
 
-    item.className = `px-3.5 py-2.5 rounded-xl cursor-pointer transition flex items-center justify-between gap-3 border ${
-      isSelected
-        ? 'bg-amber-500/10 border-amber-500/50 shadow-md shadow-amber-950/20'
-        : 'bg-slate-900/50 border-white/5 hover:bg-slate-800/70 hover:border-white/10'
-    }`;
+    let cardClasses = 'px-3.5 py-2.5 rounded-xl cursor-pointer transition flex items-center justify-between gap-3 border ';
+    if (isLight) {
+      cardClasses += isSelected ? 'station-card-active ' : 'station-card-default ';
+    } else {
+      cardClasses += isSelected
+        ? 'bg-amber-500/10 border-amber-500/50 shadow-md shadow-amber-950/20 '
+        : 'bg-slate-900/50 border-white/5 hover:bg-slate-800/70 hover:border-white/10 ';
+    }
+
+    item.className = cardClasses;
 
     item.innerHTML = `
       <div class="flex items-center gap-3 min-w-0">
@@ -355,12 +424,12 @@ function renderStationDirectory() {
           ${station.code}
         </span>
         <div class="min-w-0">
-          <h4 class="text-xs md:text-sm font-semibold text-slate-100 truncate">${station.name}</h4>
-          <p class="text-[11px] md:text-xs text-slate-400 truncate">${station.city}</p>
+          <h4 class="text-xs md:text-sm font-semibold truncate ${isLight ? 'station-card-title' : 'text-slate-100'}">${station.name}</h4>
+          <p class="text-[11px] md:text-xs truncate ${isLight ? 'station-card-sub' : 'text-slate-400'}">${station.city}</p>
         </div>
       </div>
       <div class="shrink-0 text-right">
-        <span class="text-xs font-mono font-medium text-amber-400">${station.elevation}m</span>
+        <span class="text-xs font-mono font-semibold ${isLight ? 'station-card-elev' : 'text-amber-400'}">${station.elevation}m</span>
       </div>
     `;
 
@@ -368,7 +437,7 @@ function renderStationDirectory() {
   });
 }
 
-// Buka/Tutup Drawer Info Detail
+// Buka / Tutup Drawer Detail
 function toggleStationDrawer() {
   const drawer = document.getElementById('stationDrawer');
   if (drawer.classList.contains('drawer-active')) {
@@ -390,7 +459,7 @@ function openStationDrawer() {
   }
   const detailBtn = document.getElementById('toggleDetailBtn');
   if (detailBtn) {
-    detailBtn.classList.add('border-amber-500/50', 'bg-amber-500/15', 'text-amber-300');
+    detailBtn.classList.add('border-amber-500', 'bg-amber-500/15');
   }
 }
 
@@ -402,7 +471,7 @@ function closeStationDrawer() {
   }
   const detailBtn = document.getElementById('toggleDetailBtn');
   if (detailBtn) {
-    detailBtn.classList.remove('border-amber-500/50', 'bg-amber-500/15', 'text-amber-300');
+    detailBtn.classList.remove('border-amber-500', 'bg-amber-500/15');
   }
   activeStationId = null;
   document.querySelectorAll('.station-marker-icon').forEach(el => el.classList.remove('pin-selected'));
@@ -434,7 +503,6 @@ function selectStation(stationId, shouldPan = true) {
   openStationDrawer();
 }
 
-// Isi Detail Stasiun dengan Teks Besar & Jelas di PC
 function populateDrawer(station) {
   document.getElementById('drawerTitle').innerText = `${station.name} (${station.code})`;
   document.getElementById('drawerCity').innerText = station.city;
@@ -443,28 +511,46 @@ function populateDrawer(station) {
   document.getElementById('drawerReview').innerText = station.review;
   document.getElementById('drawerLayoutGuide').innerText = station.layout;
 
+  const isLight = (currentTheme === 'light');
+
+  // Badge Tipe
   const badgeType = document.getElementById('drawerBadgeType');
   badgeType.innerText = station.type;
-  badgeType.style.backgroundColor = `${PIN_COLORS[station.category]}25`;
-  badgeType.style.color = PIN_COLORS[station.category];
+  if (isLight) {
+    badgeType.style.backgroundColor = `${PIN_COLORS[station.category]}20`;
+    badgeType.style.color = PIN_COLORS[station.category];
+    badgeType.style.border = `1px solid ${PIN_COLORS[station.category]}50`;
+  } else {
+    badgeType.style.backgroundColor = `${PIN_COLORS[station.category]}25`;
+    badgeType.style.color = PIN_COLORS[station.category];
+    badgeType.style.border = 'none';
+  }
 
+  // Badge Status
   const badgeStatus = document.getElementById('drawerBadgeStatus');
   badgeStatus.innerText = station.status;
   if (station.status.includes('Aktif')) {
-    badgeStatus.className = 'text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase bg-emerald-500/20 text-emerald-400';
+    badgeStatus.className = isLight
+      ? 'text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase bg-emerald-100 text-emerald-800 border border-emerald-300'
+      : 'text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
   } else {
-    badgeStatus.className = 'text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase bg-amber-500/20 text-amber-400';
+    badgeStatus.className = isLight
+      ? 'text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase bg-amber-100 text-amber-900 border border-amber-300'
+      : 'text-[10px] md:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full tracking-wider uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30';
   }
 
   const drawerImg = document.getElementById('drawerImage');
   drawerImg.src = station.image;
 
+  // Fasilitas
   const facContainer = document.getElementById('drawerFacilities');
   facContainer.innerHTML = '';
   station.facilities.forEach(fac => {
     const item = document.createElement('div');
-    item.className = 'p-2.5 bg-slate-900/80 border border-white/5 rounded-xl text-xs md:text-sm text-slate-200 flex items-center gap-2';
-    item.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-xs"></i> <span class="truncate">${fac}</span>`;
+    item.className = isLight
+      ? 'p-2.5 bg-slate-100/90 border border-slate-200 rounded-xl text-xs md:text-sm text-slate-800 flex items-center gap-2 font-medium shadow-sm'
+      : 'p-2.5 bg-slate-900/80 border border-white/5 rounded-xl text-xs md:text-sm text-slate-200 flex items-center gap-2 font-medium';
+    item.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 text-xs shrink-0"></i> <span class="truncate">${fac}</span>`;
     facContainer.appendChild(item);
   });
 
