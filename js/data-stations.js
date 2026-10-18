@@ -1,6 +1,6 @@
 /**
  * DATA RESMI STASIUN & JALUR REL (JAWA & SUMATERA)
- * Mencakup Antarkota, Whoosh, KRL Jabodetabek, KRL Yogyakarta-Solo, Bandara, dan Heritage.
+ * Lengkap dengan Antarkota, Whoosh, KRL Jabodetabek & Yogya-Solo, KA Lokal KCI, dan KA Lokal KAI
  */
 const STATIONS_DATA = [
   // ========================== WHOOSH KERETA CEPAT ==========================
@@ -223,24 +223,6 @@ const STATIONS_DATA = [
     operationalYears: "1870 - Sekarang"
   },
   {
-    id: "mn",
-    name: "Madiun",
-    code: "MN",
-    category: "antarkota",
-    region: "Daop 7 Madiun",
-    city: "Kota Madiun",
-    lat: -7.6186,
-    lng: 111.5247,
-    elevation: 63,
-    status: "Aktif",
-    type: "Stasiun Besar Kelas A",
-    image: "assets/images/stations/mn.jpg",
-    review: "Pusat Daop 7 berdekatan dengan pabrik industri manufaktur kereta nasional PT INKA. Titik pergantian kru seluruh KA selatan.",
-    facilities: ["Monumen Lokomotif C2407", "Underpass Penumpang", "Sentra Pecel Madiun", "Ruang VIP"],
-    layout: "Emplasemen luas dengan peron tinggi berkanopi.",
-    operationalYears: "1882 - Sekarang"
-  },
-  {
     id: "sgu",
     name: "Surabaya Gubeng",
     code: "SGU",
@@ -253,7 +235,7 @@ const STATIONS_DATA = [
     status: "Aktif",
     type: "Stasiun Terbesar Jatim",
     image: "assets/images/stations/sgu.jpg",
-    review: "Stasiun kereta api terbesar di Surabaya dengan dua gedung utama: Gubeng Baru (KA Antarkota) dan Gubeng Lama (KA Lokal).",
+    review: "Stasiun kereta api terbesar di Surabaya dengan dua gedung utama: Gubeng Baru (KA Antarkota) dan Gubeng Lama (KA Lokal & Commuter).",
     facilities: ["Boarding Face Recognition", "Drop Zone Luas", "Lounge Eksekutif", "Koneksi Bus Trans Semanggi"],
     layout: "Gubeng Baru sisi timur dan Gubeng Lama sisi barat terhubung terowongan penyeberangan.",
     operationalYears: "1878 - Sekarang"
@@ -276,99 +258,231 @@ const STATIONS_DATA = [
     layout: "Hall concourse modern dengan akses langsung ke seluruh peron pulau.",
     operationalYears: "1900 - Sekarang"
   },
+
+  // ========================== KA LOKAL COMMUTER LINE (KCI) ==========================
+  // --- Lokal Bandung Raya & Garut ---
   {
-    id: "jr",
-    name: "Jember",
-    code: "JR",
-    category: "antarkota",
-    region: "Daop 9 Jember",
-    city: "Kabupaten Jember",
-    lat: -8.1650,
-    lng: 113.7033,
-    elevation: 89,
+    id: "ccl",
+    name: "Cicalengka",
+    code: "CCL",
+    category: "lokal-kci",
+    region: "Lokal Bandung Raya & Garut",
+    city: "Kabupaten Bandung",
+    lat: -6.9832,
+    lng: 107.8383,
+    elevation: 689,
     status: "Aktif",
-    type: "Pusat Daop 9",
-    image: "assets/images/stations/jr.jpg",
-    review: "Pusat operasional Daop 9 yang mengatur kelancaran perjalanan kereta api dari Bangil hingga Banyuwangi Ketapang.",
-    facilities: ["Customer Service CS 121", "Ruang Laktasi", "Area Bermain Anak", "Peron Tinggi"],
-    layout: "Stasiun peninggalan SS dengan emplasemen rapi dan peron beratap.",
-    operationalYears: "1897 - Sekarang"
+    type: "Terminus Timur CL Bandung Raya",
+    image: "assets/images/stations/ccl.jpg",
+    review: "Stasiun terminus timur Commuter Line Bandung Raya. Menjadi titik balik armada kereta lokal menuju Kiaracondong dan Padalarang.",
+    facilities: ["Peron Tinggi Baru", "Underpass Penyeberangan", "Tap Multi-Trip"],
+    layout: "Gedung modern baru dengan 4 jalur peron.",
+    operationalYears: "1884 (Modernisasi 2024) - Sekarang"
   },
   {
-    id: "ktg",
-    name: "Ketapang (Banyuwangi)",
-    code: "KTG",
-    category: "antarkota",
-    region: "Daop 9 Jember",
-    city: "Kabupaten Banyuwangi",
-    lat: -8.1436,
-    lng: 114.3972,
-    elevation: 7,
+    id: "cbt",
+    name: "Cibatu",
+    code: "CB",
+    category: "lokal-kci",
+    region: "Lokal Bandung Raya & Garut",
+    city: "Kabupaten Garut",
+    lat: -7.0944,
+    lng: 107.9822,
+    elevation: 612,
     status: "Aktif",
-    type: "Stasiun Ujung Timur Jawa",
-    image: "assets/images/stations/ktg.jpg",
-    review: "Stasiun aktif paling timur di Pulau Jawa, hanya berjarak 100 meter dari Pelabuhan Penyeberangan Feri Ketapang menuju Bali.",
-    facilities: ["Akses Jalan Kaki ke Pelabuhan Feri", "Parkir Wisatawan", "Ruang Tunggu Terbuka"],
-    layout: "Stasiun terminus berpola sejajar dekat pesisir Selat Bali.",
-    operationalYears: "1985 - Sekarang"
+    type: "Stasiun Percabangan Bersejarah",
+    image: "assets/images/stations/cb.jpg",
+    review: "Stasiun persimpangan legendaris antara jalur utama selatan dan jalur cabang reaktivasi menuju Garut. Pernah disinggahi komedian dunia Charlie Chaplin pada tahun 1932.",
+    facilities: ["Monumen Sejarah SS", "Ruang Tunggu Luas", "Layanan Tiket Lokal"],
+    layout: "Emplasemen luas dengan depo lokomotif pembantu pegunungan.",
+    operationalYears: "1889 - Sekarang"
+  },
+  {
+    id: "grt",
+    name: "Garut",
+    code: "GRT",
+    category: "lokal-kci",
+    region: "Lokal Bandung Raya & Garut",
+    city: "Kabupaten Garut",
+    lat: -7.2106,
+    lng: 107.9069,
+    elevation: 717,
+    status: "Aktif",
+    type: "Stasiun Reaktivasi Terminus",
+    image: "assets/images/stations/grt.jpg",
+    review: "Stasiun reaktivasi megah di jantung Kota Garut. Melayani KA Commuter Line Garut relasi Purwakarta-Cibatu-Garut serta KA Cikuray menuju Pasar Senen.",
+    facilities: ["Gedung Stasiun Megah Bertingkat", "Ruang Laktasi", "Parkir Park & Ride", "Sentra Dodol Garut"],
+    layout: "Bangunan modern bergaya kolonial dengan 3 jalur peron tinggi.",
+    operationalYears: "1889 (Reaktivasi 2022) - Sekarang"
   },
 
-  // ========================== KRL COMMUTER LINE JABODETABEK ==========================
-  // --- Lintas Bogor Line ---
+  // --- Lokal KCI Jawa Timur (Dhoho & Penataran) ---
   {
-    id: "jakk",
-    name: "Jakarta Kota",
-    code: "JAKK",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Jakarta Barat",
-    lat: -6.1376,
-    lng: 106.8146,
-    elevation: 4,
+    id: "kds",
+    name: "Kandangan",
+    code: "KDA",
+    category: "lokal-kci",
+    region: "Lokal Jatim Dhoho-Penataran",
+    city: "Kota Surabaya",
+    lat: -7.2586,
+    lng: 112.6711,
+    elevation: 2,
     status: "Aktif",
-    type: "Terminus KRL & Cagar Budaya",
-    image: "assets/images/stations/jakk.jpg",
-    review: "Stasiun terminus ikonik berkubah art-deco 'Beos' karya arsitek Frans Johan Louwrens Ghijsels. Titik awal KRL Bogor Line.",
-    facilities: ["Tap Gate Otomatis", "Underpass Integrasi", "Minimarket & ATM", "Akses Kota Tua"],
-    layout: "Peron kantong ujung dengan 12 jalur rel.",
-    operationalYears: "1870 (Gedung 1929) - Sekarang"
+    type: "Percabangan Lokal Surabaya",
+    image: "assets/images/stations/kda.jpg",
+    review: "Stasiun persimpangan antara jalur barat Surabaya Pasarturi menuju Semarang dan jalur selatan menuju Kertosono/Malang.",
+    facilities: ["Tap Gate Tiket", "Ruang Tunggu", "Peron Beratap"],
+    layout: "Stasiun segitiga pembalik rel dengan 3 peron.",
+    operationalYears: "1900 - Sekarang"
   },
   {
-    id: "jua",
-    name: "Juanda",
-    code: "JUA",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Jakarta Pusat",
-    lat: -6.1667,
-    lng: 106.8302,
-    elevation: 15,
+    id: "kts",
+    name: "Kertosono",
+    code: "KTS",
+    category: "lokal-kci",
+    region: "Lokal Jatim Dhoho-Penataran",
+    city: "Kabupaten Nganjuk",
+    lat: -7.5925,
+    lng: 112.1006,
+    elevation: 43,
     status: "Aktif",
-    type: "Stasiun Layang KRL",
-    image: "assets/images/stations/jua.jpg",
-    review: "Stasiun layang strategis dekat Masjid Istiqlal dan Gereja Katedral dengan jembatan penghubung Halte Transjakarta Juanda.",
-    facilities: ["Skybridge Transjakarta", "Lift & Eskalator", "Toilet Standar KAI", "Musholla"],
-    layout: "Stasiun layang 2 jalur dengan peron sisi.",
-    operationalYears: "1992 - Sekarang"
+    type: "Hub Percabangan Dhoho",
+    image: "assets/images/stations/kts.jpg",
+    review: "Stasiun percabangan utama antara jalur Surabaya-Madiun-Solo dan jalur melingkar selatan menuju Kediri-Blitar-Malang (CL Dhoho).",
+    facilities: ["Ruang Tunggu Eksekutif", "Underpass Penumpang", "Warung Kuliner Khas Kertosono"],
+    layout: "Emplasemen 7 jalur rel aktif.",
+    operationalYears: "1881 - Sekarang"
   },
   {
-    id: "gdd",
-    name: "Gondangdia",
-    code: "GDD",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Jakarta Pusat",
-    lat: -6.1864,
-    lng: 106.8329,
-    elevation: 17,
+    id: "kd",
+    name: "Kediri",
+    code: "KD",
+    category: "lokal-kci",
+    region: "Lokal Jatim Dhoho-Penataran",
+    city: "Kota Kediri",
+    lat: -7.8183,
+    lng: 112.0167,
+    elevation: 68,
     status: "Aktif",
-    type: "Stasiun Layang KRL",
-    image: "assets/images/stations/gdd.jpg",
-    review: "Stasiun layang di kawasan perkantoran Menteng dan Kebon Sirih dengan arus penumpang komuter padat.",
-    facilities: ["Pusat Kuliner Lantai Dasar", "Eskalator", "Ruang Laktasi", "Charging Point"],
-    layout: "Stasiun elevated 2 peron sisi.",
-    operationalYears: "1992 - Sekarang"
+    type: "Stasiun Besar Kelas 1",
+    image: "assets/images/stations/kd.jpg",
+    review: "Stasiun utama di Kota Tahu yang melayani KA Antarkota (Kahuripan, Brantas, Singasari) serta puluhan trip harian Commuter Line Dhoho.",
+    facilities: ["Ruang Tunggu Ber-AC", "Face Recognition", "Sentra Tahu Kuning Kediri"],
+    layout: "Bangunan kolonial terawat dengan peron pulau kanopi panjang.",
+    operationalYears: "1882 - Sekarang"
   },
+  {
+    id: "bl",
+    name: "Blitar",
+    code: "BL",
+    category: "lokal-kci",
+    region: "Lokal Jatim Dhoho-Penataran",
+    city: "Kota Blitar",
+    lat: -8.1008,
+    lng: 112.1644,
+    elevation: 167,
+    status: "Aktif",
+    type: "Stasiun Titik Temu Dhoho-Penataran",
+    image: "assets/images/stations/bl.jpg",
+    review: "Stasiun di Kota Proklamator Bung Karno. Titik perpindahan nama kereta lingkar Jawa Timur dari Commuter Line Dhoho menjadi Penataran.",
+    facilities: ["Patung & Galeri Sejarah Bung Karno", "VIP Lounge", "Underpass"],
+    layout: "Emplasemen 6 jalur dengan depo sarana rangkaian.",
+    operationalYears: "1884 - Sekarang"
+  },
+  {
+    id: "ml",
+    name: "Malang (Kotabaru)",
+    code: "ML",
+    category: "lokal-kci",
+    region: "Lokal Jatim Dhoho-Penataran",
+    city: "Kota Malang",
+    lat: -7.9775,
+    lng: 112.6375,
+    elevation: 444,
+    status: "Aktif",
+    type: "Stasiun Besar Pegunungan",
+    image: "assets/images/stations/ml.jpg",
+    review: "Stasiun utama di Kota Malang dengan gedung baru bergaya arsitektur Gunung Kawi yang terhubung jembatan layang kaca skybridge melintasi seluruh rel.",
+    facilities: ["Gedung Baru Sisi Timur", "Skybridge Kaca", "Lounge Eksekutif", "Integrasi Bus Wisata"],
+    layout: "Lantai 2 concourse skybridge, Lantai 1 peron pulau 5 jalur.",
+    operationalYears: "1879 (Gedung Timur 2021) - Sekarang"
+  },
+
+  // ========================== KA LOKAL DIKELOLA KAI (NON-KRL) ==========================
+  {
+    id: "bop",
+    name: "Bogor Paledang",
+    code: "BOP",
+    category: "lokal-kai",
+    region: "KA Lokal Pangrango & Siliwangi",
+    city: "Kota Bogor",
+    lat: -6.6006,
+    lng: 106.7906,
+    elevation: 246,
+    status: "Aktif",
+    type: "Terminus KA Lokal Pangrango",
+    image: "assets/images/stations/bop.jpg",
+    review: "Stasiun terminus keberangkatan KA Pangrango (Bogor Paledang-Sukabumi) yang terhubung skybridge pedestrian langsung ke Stasiun KRL Bogor.",
+    facilities: ["Skybridge ke Stasiun KRL Bogor", "Loket KA Lokal", "Ruang Boarding Khusus"],
+    layout: "Stasiun permukaan dengan 2 jalur aktif.",
+    operationalYears: "2013 - Sekarang"
+  },
+  {
+    id: "si",
+    name: "Sukabumi",
+    code: "SI",
+    category: "lokal-kai",
+    region: "KA Lokal Pangrango & Siliwangi",
+    city: "Kota Sukabumi",
+    lat: -6.9286,
+    lng: 106.9275,
+    elevation: 584,
+    status: "Aktif",
+    type: "Hub KA Pangrango & KA Siliwangi",
+    image: "assets/images/stations/si.jpg",
+    review: "Stasiun persimpangan di kaki Gunung Gede-Pangrango. Titik pergantian armada bagi penumpang KA Pangrango (dari Bogor) yang hendak bersambung KA Siliwangi menuju Cianjur dan Cipatat.",
+    facilities: ["Peron Transit Khusus", "Ruang Tunggu", "Pusat Informasi KAI 121"],
+    layout: "Gedung klasik kolonial SS dengan 5 jalur aktif.",
+    operationalYears: "1882 - Sekarang"
+  },
+  {
+    id: "cj",
+    name: "Cianjur",
+    code: "CJ",
+    category: "lokal-kai",
+    region: "KA Lokal Pangrango & Siliwangi",
+    city: "Kabupaten Cianjur",
+    lat: -6.8217,
+    lng: 107.1425,
+    elevation: 458,
+    status: "Aktif",
+    type: "Stasiun Reaktivasi KA Siliwangi",
+    image: "assets/images/stations/cj.jpg",
+    review: "Stasiun cagar budaya di pusat Kota Cianjur peninggalan SS tahun 1883 yang direaktivasi melayani KA Siliwangi menuju Sukabumi dan Cipatat.",
+    facilities: ["Bangunan Cagar Budaya Terawat", "Peron Tinggi Ramah Lansia", "Parkir Motor & Mobil"],
+    layout: "Emplasemen 3 jalur rel.",
+    operationalYears: "1883 (Reaktivasi 2014) - Sekarang"
+  },
+  {
+    id: "cpt",
+    name: "Cipatat",
+    code: "CPT",
+    category: "lokal-kai",
+    region: "KA Lokal Pangrango & Siliwangi",
+    city: "Kabupaten Bandung Barat",
+    lat: -6.8378,
+    lng: 107.3828,
+    elevation: 387,
+    status: "Aktif",
+    type: "Terminus Timur KA Siliwangi",
+    image: "assets/images/stations/cpt.jpg",
+    review: "Stasiun terminus ujung timur KA Siliwangi setelah Terowongan Lampegan (terowongan KA tertua di Jawa Barat peninggalan 1882).",
+    facilities: ["Peron Tinggi Baru", "Loket Tiket", "Ruang Tunggu Terbuka"],
+    layout: "Emplasemen pegunungan 2 jalur aktif.",
+    operationalYears: "1884 (Reaktivasi 2020) - Sekarang"
+  },
+
+  // ========================== KRL JABODETABEK & YOGYAKARTA-SOLO ==========================
   {
     id: "mri",
     name: "Manggarai (Sentral)",
@@ -388,168 +502,6 @@ const STATIONS_DATA = [
     operationalYears: "1918 (Sentral 2022) - Sekarang"
   },
   {
-    id: "teb",
-    name: "Tebet",
-    code: "TEB",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Jakarta Selatan",
-    lat: -6.2263,
-    lng: 106.8582,
-    elevation: 17,
-    status: "Aktif",
-    type: "Stasiun Komuter",
-    image: "assets/images/stations/teb.jpg",
-    review: "Stasiun transit komuter yang terintegrasi langsung dengan integrasi Mikrotrans dan Transjakarta Koridor Tebet.",
-    facilities: ["Halte Integrasi Bus", "Gate Tap Multi-Trip", "Kios Retail"],
-    layout: "Stasiun permukaan dengan peron pulau.",
-    operationalYears: "1970 - Sekarang"
-  },
-  {
-    id: "cw",
-    name: "Cawang",
-    code: "CW",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Jakarta Selatan",
-    lat: -6.2427,
-    lng: 106.8601,
-    elevation: 26,
-    status: "Aktif",
-    type: "Stasiun Integrasi LRT & BRT",
-    image: "assets/images/stations/cw.jpg",
-    review: "Stasiun hub transit multimodal yang terhubung jembatan layang langsung dengan Stasiun LRT Jabodebek Cikoko dan Halte Transjakarta.",
-    facilities: ["JPO ke LRT Jabodebek Cikoko", "Lift Aksesibel", "Minimarket"],
-    layout: "Stasiun permukaan dengan jembatan penghubung atas.",
-    operationalYears: "1970 - Sekarang"
-  },
-  {
-    id: "psm",
-    name: "Pasar Minggu",
-    code: "PSM",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Jakarta Selatan",
-    lat: -6.2842,
-    lng: 106.8441,
-    elevation: 36,
-    status: "Aktif",
-    type: "Stasiun Komuter",
-    image: "assets/images/stations/psm.jpg",
-    review: "Salah satu stasiun tersibuk di selatan Jakarta dengan akses terpadu ke terminal dan pasar tradisional.",
-    facilities: ["Jembatan Penyeberangan", "Underpass", "Mesin Tiket Mandiri"],
-    layout: "3 jalur rel dengan 2 peron penumpang berkanopi.",
-    operationalYears: "1884 - Sekarang"
-  },
-  {
-    id: "ui",
-    name: "Universitas Indonesia",
-    code: "UI",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Kota Depok",
-    lat: -6.3606,
-    lng: 106.8317,
-    elevation: 69,
-    status: "Aktif",
-    type: "Stasiun Kampus Komuter",
-    image: "assets/images/stations/ui.jpg",
-    review: "Terletak tepat di dalam kompleks kampus Universitas Indonesia, menjadi urat nadi mobilitas ribuan mahasiswa dan sivitas akademika.",
-    facilities: ["Akses Langsung Jalur Sepeda UI", "JPO Kanopi", "Tap In/Out Otomatis"],
-    layout: "Stasiun permukaan dengan peron sisi terhubung JPO.",
-    operationalYears: "1993 - Sekarang"
-  },
-  {
-    id: "dpb",
-    name: "Depok Baru",
-    code: "DPB",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Kota Depok",
-    lat: -6.3917,
-    lng: 106.8217,
-    elevation: 93,
-    status: "Aktif",
-    type: "Stasiun Komuter Kelas 1",
-    image: "assets/images/stations/dpb.jpg",
-    review: "Stasiun pemberhentian utama di pusat Kota Depok yang berdampingan dengan Terminal Depok dan pusat perbelanjaan Margonda.",
-    facilities: ["Jembatan Penyeberangan", "Ruang Laktasi", "Area Parkir Terpadu"],
-    layout: "3 peron penumpang dengan 4 jalur aktif.",
-    operationalYears: "1992 - Sekarang"
-  },
-  {
-    id: "dp",
-    name: "Depok (Lama)",
-    code: "DP",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Kota Depok",
-    lat: -6.4058,
-    lng: 106.8189,
-    elevation: 93,
-    status: "Aktif",
-    type: "Stasiun & Depo Terbesar",
-    image: "assets/images/stations/dp.jpg",
-    review: "Berdampingan langsung dengan Depo KRL Depok (salah satu depo sarana rel listrik terluas di Asia Tenggara). Titik awal kereta pemberangkatan Depok.",
-    facilities: ["Depo Perawatan KRL", "Jembatan Penyeberangan", "Kios Retail"],
-    layout: "Emplasemen 4 jalur utama menuju fasilitas depo.",
-    operationalYears: "1873 - Sekarang"
-  },
-  {
-    id: "cta",
-    name: "Citayam",
-    code: "CTA",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Kabupaten Bogor",
-    lat: -6.4489,
-    lng: 106.8014,
-    elevation: 120,
-    status: "Aktif",
-    type: "Stasiun Percabangan Komuter",
-    image: "assets/images/stations/cta.jpg",
-    review: "Stasiun percabangan utama antara jalur menuju Bogor dan jalur cabang menuju Nambo.",
-    facilities: ["Underpass Penyeberangan", "Gate Tiket Multi-Trip", "Area Parkir"],
-    layout: "3 jalur rel dengan 2 peron pulau.",
-    operationalYears: "1873 - Sekarang"
-  },
-  {
-    id: "bjd",
-    name: "Bojonggede",
-    code: "BJD",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Kabupaten Bogor",
-    lat: -6.4933,
-    lng: 106.7958,
-    elevation: 140,
-    status: "Aktif",
-    type: "Stasiun Integrasi Skybridge",
-    image: "assets/images/stations/bjd.jpg",
-    review: "Stasiun komuter terpadu yang terhubung skybridge modern sepanjang 240 meter langsung ke Terminal Angkot Bojonggede.",
-    facilities: ["Skybridge ke Terminal Bojonggede", "Mesin Tiket", "Parkir Motor Luas"],
-    layout: "Peron sisi ganda dengan skybridge terintegrasi.",
-    operationalYears: "1873 - Sekarang"
-  },
-  {
-    id: "clt",
-    name: "Cilebut",
-    code: "CLT",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Kabupaten Bogor",
-    lat: -6.5292,
-    lng: 106.8011,
-    elevation: 171,
-    status: "Aktif",
-    type: "Stasiun Komuter",
-    image: "assets/images/stations/clt.jpg",
-    review: "Stasiun komuter perumahan padat sebelum terminus Bogor dengan fasilitas boarding otomatis.",
-    facilities: ["Underpass Penyeberangan", "Toilet Standar KAI", "Charging Point"],
-    layout: "Stasiun permukaan dengan 2 jalur aktif.",
-    operationalYears: "1873 - Sekarang"
-  },
-  {
     id: "boo",
     name: "Bogor (Buitenzorg)",
     code: "BOO",
@@ -566,26 +518,6 @@ const STATIONS_DATA = [
     facilities: ["Akses Langsung Alun-Alun Bogor", "Integrasi Biskita Trans Pakuan", "Hall Tap In Luas"],
     layout: "Stasiun peron kantong terminus dengan 8 jalur rel aktif.",
     operationalYears: "1881 - Sekarang"
-  },
-
-  // --- Lintas Cikarang / Bekasi Line ---
-  {
-    id: "jng",
-    name: "Jatinegara",
-    code: "JNG",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Jakarta Timur",
-    lat: -6.2151,
-    lng: 106.8681,
-    elevation: 16,
-    status: "Aktif",
-    type: "Stasiun Integrasi Besar",
-    image: "assets/images/stations/jng.jpg",
-    review: "Simpul pertemuan KA Antarkota dan KRL Cikarang Loop Line dengan gedung baru megah dan jembatan penghubung Halte BRT Flyover Jatinegara.",
-    facilities: ["Skybridge BRT Transjakarta", "Lift & Eskalator", "Underpass", "Ruang Tunggu VIP"],
-    layout: "Lantai atas concourse tiket terhubung ke 8 jalur peron pulau.",
-    operationalYears: "1910 - Sekarang"
   },
   {
     id: "bks",
@@ -606,26 +538,6 @@ const STATIONS_DATA = [
     operationalYears: "1887 (Modern 2022) - Sekarang"
   },
   {
-    id: "ckr",
-    name: "Cikarang",
-    code: "CKR",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Kabupaten Bekasi",
-    lat: -6.2553,
-    lng: 107.1444,
-    elevation: 18,
-    status: "Aktif",
-    type: "Stasiun Terminus Elektrifikasi",
-    image: "assets/images/stations/ckr.jpg",
-    review: "Stasiun terminus timur elektrifikasi KRL Commuter Line Jabodetabek sekaligus pemberhentian KA Lokal Walahar dan Jatiluhur menuju Cikampek/Purwakarta.",
-    facilities: ["Concourse Modern Bertingkat", "Area Parkir Luas", "Face Recognition Gate"],
-    layout: "Stasiun layang terpadu dengan 8 jalur rel aktif.",
-    operationalYears: "1890 (Modern 2021) - Sekarang"
-  },
-
-  // --- Lintas Rangkasbitung Line ---
-  {
     id: "thb",
     name: "Tanah Abang",
     code: "THB",
@@ -643,82 +555,6 @@ const STATIONS_DATA = [
     layout: "Emplasemen 6 jalur rel terhubung jembatan concourse atas.",
     operationalYears: "1899 - Sekarang"
   },
-  {
-    id: "srp",
-    name: "Serpong",
-    code: "SRP",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Tangerang Selatan",
-    lat: -6.3211,
-    lng: 106.6667,
-    elevation: 46,
-    status: "Aktif",
-    type: "Stasiun Komuter Kelas 1",
-    image: "assets/images/stations/srp.jpg",
-    review: "Stasiun transit penting di kawasan penyangga BSD Serpong dengan gedung stasiun modern di atas rel.",
-    facilities: ["Jembatan Penyeberangan Beratap", "Area Parkir Terpadu", "ATM & Minimarket"],
-    layout: "Gedung di atas rel dengan 4 jalur aktif.",
-    operationalYears: "1899 - Sekarang"
-  },
-  {
-    id: "rk",
-    name: "Rangkasbitung",
-    code: "RK",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Kabupaten Lebak",
-    lat: -6.3611,
-    lng: 106.2494,
-    elevation: 22,
-    status: "Aktif",
-    type: "Terminus Barat KRL & KA Lokal",
-    image: "assets/images/stations/rk.jpg",
-    review: "Stasiun terminus barat elektrifikasi KRL Jabodetabek. Menjadi titik transit sambungan KA Lokal Merak menuju Cilegon dan Pelabuhan Merak.",
-    facilities: ["Peron Khusus KRL & KA Lokal", "Area Parkir Luas", "Customer Service"],
-    layout: "Stasiun permukaan dengan peron tinggi.",
-    operationalYears: "1899 - Sekarang"
-  },
-
-  // --- Lintas Tangerang Line ---
-  {
-    id: "du",
-    name: "Duri",
-    code: "DU",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Jakarta Barat",
-    lat: -6.1558,
-    lng: 106.8019,
-    elevation: 4,
-    status: "Aktif",
-    type: "Stasiun Percabangan Tangerang",
-    image: "assets/images/stations/du.jpg",
-    review: "Stasiun hub pertukaran antara Cikarang Loop Line, KRL Tangerang Line, dan KA Bandara Railink Soekarno-Hatta.",
-    facilities: ["Gedung Concourse Atas", "Eskalator", "Peron Khusus Bandara"],
-    layout: "5 jalur rel dengan peron pulau terhubung concourse layang.",
-    operationalYears: "1899 - Sekarang"
-  },
-  {
-    id: "tng",
-    name: "Tangerang",
-    code: "TNG",
-    category: "krl-jabodetabek",
-    region: "KRL Jabodetabek",
-    city: "Kota Tangerang",
-    lat: -6.1772,
-    lng: 106.6328,
-    elevation: 18,
-    status: "Aktif",
-    type: "Stasiun Terminus Tangerang Line",
-    image: "assets/images/stations/tng.jpg",
-    review: "Stasiun terminus ujung barat KRL Tangerang Line dekat kawasan Pasar Anyar Kota Tangerang.",
-    facilities: ["Gate Tap Otomatis", "Underpass", "Parkir Park & Ride"],
-    layout: "4 jalur peron terminus berkanopi penuh.",
-    operationalYears: "1899 - Sekarang"
-  },
-
-  // ========================== KRL COMMUTER LINE YOGYAKARTA - SOLO ==========================
   {
     id: "lpn",
     name: "Lempuyangan",
@@ -738,60 +574,6 @@ const STATIONS_DATA = [
     operationalYears: "1872 - Sekarang"
   },
   {
-    id: "mgw",
-    name: "Maguwo",
-    code: "MGW",
-    category: "krl-jogja",
-    region: "KRL Yogyakarta-Solo",
-    city: "Kabupaten Sleman",
-    lat: -7.7844,
-    lng: 110.4357,
-    elevation: 118,
-    status: "Aktif",
-    type: "Stasiun KRL Komuter",
-    image: "assets/images/stations/mgw.jpg",
-    review: "Stasiun komuter terpadu yang terhubung lorong bawah tanah underpass langsung ke Bandara Adisutjipto dan Halte Trans Jogja.",
-    facilities: ["Underpass ke Bandara Adisutjipto", "Integrasi Trans Jogja", "Tap Multi-Trip"],
-    layout: "Stasiun permukaan dengan peron tinggi berkanopi.",
-    operationalYears: "1873 (Modern 2008) - Sekarang"
-  },
-  {
-    id: "bbn",
-    name: "Brambanan (Prambanan)",
-    code: "BBN",
-    category: "krl-jogja",
-    region: "KRL Yogyakarta-Solo",
-    city: "Kabupaten Klaten",
-    lat: -7.7562,
-    lng: 110.4939,
-    elevation: 146,
-    status: "Aktif",
-    type: "Stasiun KRL Wisata",
-    image: "assets/images/stations/bbn.jpg",
-    review: "Stasiun terdekat menuju kompleks Candi Prambanan. Menjadi gerbang utama wisatawan pengguna KRL menuju situs warisan dunia UNESCO.",
-    facilities: ["Akses Angkutan Candi", "Ruang Tunggu Berpendingin", "Parkir Luas"],
-    layout: "Gedung klasik NIS dengan peron pulau KRL.",
-    operationalYears: "1873 - Sekarang"
-  },
-  {
-    id: "swt",
-    name: "Srowot",
-    code: "SWT",
-    category: "krl-jogja",
-    region: "KRL Yogyakarta-Solo",
-    city: "Kabupaten Klaten",
-    lat: -7.7323,
-    lng: 110.5373,
-    elevation: 152,
-    status: "Aktif",
-    type: "Stasiun KRL Komuter",
-    image: "assets/images/stations/swt.jpg",
-    review: "Stasiun kecil peninggalan NIS yang melayani mobilitas warga perdesaan dan komuter harian jalur Klaten-Yogya.",
-    facilities: ["Tap Gate Multi-Trip", "Toilet Bersih", "Musholla"],
-    layout: "Stasiun berukuran mungil dengan 2 jalur aktif.",
-    operationalYears: "1873 - Sekarang"
-  },
-  {
     id: "kt",
     name: "Klaten",
     code: "KT",
@@ -808,96 +590,6 @@ const STATIONS_DATA = [
     facilities: ["Underpass Penumpang", "Lounge Eksekutif", "Sentra UMKM Klaten"],
     layout: "Emplasemen 6 jalur dengan kanopi peron memanjang.",
     operationalYears: "1873 - Sekarang"
-  },
-  {
-    id: "ce",
-    name: "Ceper",
-    code: "CE",
-    category: "krl-jogja",
-    region: "KRL Yogyakarta-Solo",
-    city: "Kabupaten Klaten",
-    lat: -7.6698,
-    lng: 110.6656,
-    elevation: 133,
-    status: "Aktif",
-    type: "Stasiun KRL Komuter",
-    image: "assets/images/stations/ce.jpg",
-    review: "Stasiun pemberhentian KRL di kawasan industri pengecoran logam Batur Ceper.",
-    facilities: ["Mesin Tiket", "Peron Tinggi Ramah Disabilitas", "Area Parkir"],
-    layout: "2 jalur rel ganda dengan peron sisi.",
-    operationalYears: "1873 - Sekarang"
-  },
-  {
-    id: "dl",
-    name: "Delanggu",
-    code: "DL",
-    category: "krl-jogja",
-    region: "KRL Yogyakarta-Solo",
-    city: "Kabupaten Klaten",
-    lat: -7.6322,
-    lng: 110.7061,
-    elevation: 133,
-    status: "Aktif",
-    type: "Stasiun KRL Komuter",
-    image: "assets/images/stations/dl.jpg",
-    review: "Pemberhentian KRL di lumbung beras Delanggu yang melayani penglaju Klaten menuju Kota Solo.",
-    facilities: ["Tap Gate Otomatis", "Ruang Tunggu", "Parkir Sepeda Motor"],
-    layout: "Bangunan klasik NIS dengan peron pulau berkanopi.",
-    operationalYears: "1873 - Sekarang"
-  },
-  {
-    id: "gw",
-    name: "Gawok",
-    code: "GW",
-    category: "krl-jogja",
-    region: "KRL Yogyakarta-Solo",
-    city: "Kabupaten Sukoharjo",
-    lat: -7.5936,
-    lng: 110.7494,
-    elevation: 118,
-    status: "Aktif",
-    type: "Stasiun KRL Komuter",
-    image: "assets/images/stations/gw.jpg",
-    review: "Stasiun di perbatasan Sukoharjo-Solo yang terkenal dengan pasar tradisional Gawok dan kerajinan pandai besi.",
-    facilities: ["Tap Gate Multi-Trip", "Musholla", "Area Parkir"],
-    layout: "Stasiun 2 jalur dengan peron tinggi beratap.",
-    operationalYears: "1873 - Sekarang"
-  },
-  {
-    id: "pws",
-    name: "Purwosari",
-    code: "PWS",
-    category: "krl-jogja",
-    region: "KRL Yogyakarta-Solo",
-    city: "Kota Surakarta",
-    lat: -7.5645,
-    lng: 110.7967,
-    elevation: 98,
-    status: "Aktif",
-    type: "Stasiun Hub KRL & Railbus",
-    image: "assets/images/stations/pws.jpg",
-    review: "Stasiun persimpangan bersejarah menuju Wonogiri. Melayani KRL Solo-Jogja, KA Bengawan, dan Railbus Batara Kresna yang melintas di tengah jalan raya Slamet Riyadi.",
-    facilities: ["Jembatan Penyeberangan", "Sentra Batik Solo", "Akses Batik Solo Trans"],
-    layout: "Emplasemen 8 jalur rel dengan jalur cabang Wonogiri.",
-    operationalYears: "1875 - Sekarang"
-  },
-  {
-    id: "sk",
-    name: "Solo Jebres",
-    code: "SK",
-    category: "krl-jogja",
-    region: "KRL Yogyakarta-Solo",
-    city: "Kota Surakarta",
-    lat: -7.5623,
-    lng: 110.8385,
-    elevation: 97,
-    status: "Aktif",
-    type: "Stasiun Cagar Budaya & KRL",
-    image: "assets/images/stations/sk.jpg",
-    review: "Stasiun cagar budaya peninggalan Kasunanan Surakarta dan SS tahun 1884 dengan fasad neoklasik yang anggun. Melayani KA Matarmaja dan KRL.",
-    facilities: ["Bangunan Cagar Budaya Terawat", "Peron KRL Khusus", "Ruang Tunggu Ber-AC"],
-    layout: "Emplasemen luas dengan kanopi besi melengkung antik.",
-    operationalYears: "1884 - Sekarang"
   },
   {
     id: "pl",
@@ -956,80 +648,6 @@ const STATIONS_DATA = [
     operationalYears: "2013 - Sekarang"
   },
 
-  // ========================== DIVRE SUMATERA ==========================
-  {
-    id: "mdn",
-    name: "Medan",
-    code: "MDN",
-    category: "antarkota",
-    region: "Divre I Sumatera Utara",
-    city: "Kota Medan",
-    lat: 3.5908,
-    lng: 98.6791,
-    elevation: 22,
-    status: "Aktif",
-    type: "Stasiun Besar Bertingkat",
-    image: "assets/images/stations/mdn.jpg",
-    review: "Pusat Divre I Sumut di Lapangan Merdeka Medan peninggalan DSM. Dilengkapi rel layang elevated track untuk memecah kemacetan kota.",
-    facilities: ["Jalur Elevated Layang", "City Check-in Bandara KNM", "Ruang Tunggu VIP"],
-    layout: "Lantai bawah untuk KA Antarkota, lantai layang untuk KA Bandara Kualanamu.",
-    operationalYears: "1886 - Sekarang"
-  },
-  {
-    id: "pd",
-    name: "Padang (Simpang Haru)",
-    code: "PD",
-    category: "antarkota",
-    region: "Divre II Sumatera Barat",
-    city: "Kota Padang",
-    lat: -0.9529,
-    lng: 100.3708,
-    elevation: 8,
-    status: "Aktif",
-    type: "Stasiun Utama Divre II",
-    image: "assets/images/stations/pd.jpg",
-    review: "Pusat operasi kereta api Divre II Sumatera Barat. Melayani KA Minangkabau Ekspres menuju Bandara BIM dan KA Sibinuang rute Pariaman.",
-    facilities: ["Peron KA Bandara Minangkabau", "Musholla & Toilet Standar KAI", "Charging Booth"],
-    layout: "Gedung utama Simpang Haru dengan emplasemen kanopi memanjang.",
-    operationalYears: "1891 - Sekarang"
-  },
-  {
-    id: "kpt",
-    name: "Kertapati",
-    code: "KPT",
-    category: "antarkota",
-    region: "Divre III Palembang",
-    city: "Kota Palembang",
-    lat: -3.0139,
-    lng: 104.7578,
-    elevation: 2,
-    status: "Aktif",
-    type: "Stasiun Besar Sungai & Rel",
-    image: "assets/images/stations/kpt.jpg",
-    review: "Stasiun persimpangan sungai dan rel strategis di tepi Sungai Ogan & Musi. Melayani KA Sindang Marga, Serelo, dan angkutan batubara Babaranjang.",
-    facilities: ["Dermaga Transfer Sungai", "Lounge Antarkota", "Underpass Emplasemen"],
-    layout: "Ujung jalur buntu dengan konektivitas perairan sungai dan jalan raya.",
-    operationalYears: "1914 - Sekarang"
-  },
-  {
-    id: "tnk",
-    name: "Tanjungkarang",
-    code: "TNK",
-    category: "antarkota",
-    region: "Divre IV Tanjungkarang",
-    city: "Kota Bandar Lampung",
-    lat: -5.4055,
-    lng: 105.2581,
-    elevation: 96,
-    status: "Aktif",
-    type: "Stasiun Utama Divre IV",
-    image: "assets/images/stations/tnk.jpg",
-    review: "Stasiun utama di Provinsi Lampung peninggalan ZSS. Melayani KA Kuala Stabas dan Sriwijaya rute Baturaja hingga Palembang.",
-    facilities: ["Executive Lounge Siger", "Monumen Lokomotif Uap", "Pojok Baca Digital"],
-    layout: "Gedung stasiun berarsitektur khas siger ornamen Lampung yang bersih.",
-    operationalYears: "1914 - Sekarang"
-  },
-
   // ========================== CAGAR BUDAYA & HERITAGE ==========================
   {
     id: "abr",
@@ -1066,59 +684,146 @@ const STATIONS_DATA = [
     facilities: ["Sistem Rel Gigi Riggenbach", "Pengisian Air Ketel Uap", "Spot Panorama Lembah"],
     layout: "Emplasemen perbukitan dengan rel gigi khusus di tengah bantalan.",
     operationalYears: "1905 - Sekarang"
-  },
-  {
-    id: "swl",
-    name: "Sawahlunto (UNESCO)",
-    code: "SWL",
-    category: "heritage",
-    region: "Heritage NIS / SS",
-    city: "Kota Sawahlunto",
-    lat: -0.6806,
-    lng: 100.7767,
-    elevation: 261,
-    status: "Preservasi / Museum",
-    type: "World Heritage UNESCO",
-    image: "assets/images/stations/swl.jpg",
-    review: "Bagian dari warisan dunia Ombilin UNESCO. Rumah bagi lokomotif uap bersejarah 'Mak Itam' (E1060) pengangkut batubara menembus Bukit Barisan.",
-    facilities: ["Museum Kereta Api", "Depo Mak Itam", "Pusat Informasi UNESCO"],
-    layout: "Gedung kayu klasik bernuansa kolonial abad ke-19.",
-    operationalYears: "1894 - Sekarang"
-  },
-  {
-    id: "ckg",
-    name: "Eks Stasiun Cikajang (+1.246 M)",
-    code: "CKG",
-    category: "heritage",
-    region: "Heritage NIS / SS",
-    city: "Kabupaten Garut",
-    lat: -7.3750,
-    lng: 107.7825,
-    elevation: 1246,
-    status: "Non-Aktif Bersejarah",
-    type: "Eks Stasiun Tertinggi",
-    image: "assets/images/stations/ckg.jpg",
-    review: "Stasiun bersejarah pemegang rekor stasiun tertinggi di Asia Tenggara (+1.246 mdpl) di jalur pegunungan Cibatu-Garut-Cikajang.",
-    facilities: ["Patok Ketinggian Kuno +1246 M", "Sisa Emplasemen Kolonial"],
-    layout: "Terletak di dataran tinggi perkebunan teh kaki Gunung Cikuray.",
-    operationalYears: "1926 - 1982"
-  },
-  {
-    id: "pnd",
-    name: "Eks Stasiun Pangandaran",
-    code: "PND",
-    category: "heritage",
-    region: "Heritage NIS / SS",
-    city: "Kabupaten Pangandaran",
-    lat: -7.6890,
-    lng: 108.6477,
-    elevation: 7,
-    status: "Non-Aktif Bersejarah",
-    type: "Lintas Banjar-Cijulang",
-    image: "assets/images/stations/pnd.jpg",
-    review: "Pemberhentian jalur pantai selatan Banjar-Cijulang. Terkenal dengan Terowongan Wilhelmina (1.116 m) dan Jembatan Cikacepit.",
-    facilities: ["Situs Terowongan Wilhelmina", "Emplasemen Tepi Laut"],
-    layout: "Dekat kawasan cagar alam laut Pangandaran.",
-    operationalYears: "1921 - 1984"
   }
 ];
+
+/**
+ * KOORDINAT JALUR REL POLYLINES (RUTE OPERASIONAL TERPILIH)
+ */
+const RAILWAY_ROUTES = {
+  "whoosh": {
+    name: "KCIC Whoosh Cepat",
+    color: "#ef4444",
+    weight: 5,
+    coords: [
+      [-6.2444, 106.8833], // Halim
+      [-6.3686, 107.2842], // Karawang
+      [-6.8427, 107.4975], // Padalarang
+      [-6.9664, 107.7126]  // Tegalluar
+    ]
+  },
+  "antarkota-utara": {
+    name: "KA Antarkota (Pantura)",
+    color: "#3b82f6",
+    weight: 4,
+    coords: [
+      [-6.1767, 106.8306], // Gambir
+      [-6.2151, 106.8681], // Jatinegara
+      [-6.2361, 106.9994], // Bekasi
+      [-6.2553, 107.1444], // Cikarang
+      [-6.4050, 107.4520], // Cikampek
+      [-6.7061, 108.5557], // Cirebon
+      [-6.8686, 109.1394], // Tegal
+      [-6.8886, 109.6753], // Pekalongan
+      [-6.9644, 110.4281], // Semarang Tawang
+      [-7.1517, 111.5897], // Cepu
+      [-7.1561, 111.8819], // Bojonegoro
+      [-7.1086, 112.4161], // Lamongan
+      [-7.2479, 112.7314]  // Surabaya Pasarturi
+    ]
+  },
+  "antarkota-selatan": {
+    name: "KA Antarkota (Lintas Selatan)",
+    color: "#6366f1",
+    weight: 4,
+    coords: [
+      [-6.1747, 106.8447], // Pasar Senen
+      [-6.7061, 108.5557], // Cirebon
+      [-7.4194, 109.2217], // Purwokerto
+      [-7.6294, 109.2526], // Kroya
+      [-7.7183, 109.9075], // Kutoarjo
+      [-7.7892, 110.3635], // Yogyakarta
+      [-7.5575, 110.8214], // Solo Balapan
+      [-7.6186, 111.5247], // Madiun
+      [-7.5925, 112.1006], // Kertosono
+      [-7.4475, 112.7178], // Sidoarjo
+      [-7.2654, 112.7523]  // Surabaya Gubeng
+    ]
+  },
+  "krl-jabodetabek": {
+    name: "KRL Commuter Jabodetabek",
+    color: "#22d3ee",
+    weight: 4,
+    coords: [
+      [-6.1376, 106.8146], // Jakarta Kota
+      [-6.1667, 106.8302], // Juanda
+      [-6.1864, 106.8329], // Gondangdia
+      [-6.2099, 106.8499], // Manggarai
+      [-6.2427, 106.8601], // Cawang
+      [-6.2842, 106.8441], // Pasar Minggu
+      [-6.3606, 106.8317], // UI
+      [-6.3917, 106.8217], // Depok Baru
+      [-6.4489, 106.8014], // Citayam
+      [-6.4933, 106.7958], // Bojonggede
+      [-6.5292, 106.8011], // Cilebut
+      [-6.5956, 106.7903]  // Bogor
+    ]
+  },
+  "krl-jogja": {
+    name: "KRL Yogyakarta–Solo–Palur",
+    color: "#34d399",
+    weight: 4,
+    coords: [
+      [-7.7892, 110.3635], // Yogyakarta
+      [-7.7903, 110.3752], // Lempuyangan
+      [-7.7844, 110.4357], // Maguwo
+      [-7.7562, 110.4939], // Brambanan
+      [-7.7323, 110.5373], // Srowot
+      [-7.7121, 110.6033], // Klaten
+      [-7.6698, 110.6656], // Ceper
+      [-7.6322, 110.7061], // Delanggu
+      [-7.5936, 110.7494], // Gawok
+      [-7.5645, 110.7967], // Purwosari
+      [-7.5575, 110.8214], // Solo Balapan
+      [-7.5623, 110.8385], // Solo Jebres
+      [-7.5678, 110.8758]  // Palur
+    ]
+  },
+  "lokal-bandung": {
+    name: "Lokal Bandung Raya & Garut",
+    color: "#fbbf24",
+    weight: 4,
+    coords: [
+      [-6.8427, 107.4975], // Padalarang
+      [-6.8789, 107.5458], // Cimahi
+      [-6.9144, 107.6025], // Bandung
+      [-6.9248, 107.6465], // Kiaracondong
+      [-6.9832, 107.8383], // Cicalengka
+      [-7.0944, 107.9822], // Cibatu
+      [-7.2106, 107.9069]  // Garut
+    ]
+  },
+  "lokal-jatim": {
+    name: "Lokal Dhoho & Penataran Jatim",
+    color: "#facc15",
+    weight: 4,
+    coords: [
+      [-7.2654, 112.7523], // Surabaya Gubeng
+      [-7.4475, 112.7178], // Sidoarjo
+      [-7.5500, 112.4333], // Mojokerto
+      [-7.5925, 112.1006], // Kertosono
+      [-7.8183, 112.0167], // Kediri
+      [-8.0167, 111.9000], // Tulungagung
+      [-8.1008, 112.1644], // Blitar
+      [-8.1667, 112.5667], // Wlingi
+      [-8.1500, 112.5667], // Kepanjen
+      [-7.9775, 112.6375], // Malang
+      [-7.7000, 112.7167], // Bangil
+      [-7.2654, 112.7523]  // Kembali Surabaya (Looping)
+    ]
+  },
+  "lokal-kai": {
+    name: "KA Lokal Pangrango & Siliwangi",
+    color: "#c084fc",
+    weight: 4,
+    coords: [
+      [-6.6006, 106.7906], // Bogor Paledang
+      [-6.6908, 106.8086], // Maseng
+      [-6.7583, 106.8272], // Cicurug
+      [-6.9286, 106.9275], // Sukabumi
+      [-6.8500, 107.0333], // Gandasoli
+      [-6.8217, 107.1425], // Cianjur
+      [-6.8378, 107.3828]  // Cipatat
+    ]
+  }
+};
