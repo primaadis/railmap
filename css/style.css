@@ -2,15 +2,291 @@
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-#map {
+/* ========================================================
+   1. TEMA GELAP (DARK MODE - DEFAULT CINEMATIC GIS)
+======================================================== */
+body.theme-dark {
+  background-color: #070a11;
+  color: #f1f5f9;
+}
+
+body.theme-dark #map {
   background-color: #0b0f19 !important;
-  width: 100%;
-  height: 100%;
 }
 
-/* Navigasi Kanan Dinamis (Berdampingan Mulus dengan Drawer) */
+body.theme-dark #sidebarDirectory {
+  background-color: rgba(9, 13, 22, 0.98);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.theme-dark .header-divider,
+body.theme-dark .filter-pills-bar,
+body.theme-dark .region-select-bar,
+body.theme-dark .app-footer-bar,
+body.theme-dark .dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.theme-dark .app-title-text,
+body.theme-dark .app-main-title,
+body.theme-dark .drawer-header-title,
+body.theme-dark .dropdown-header-title {
+  color: #ffffff;
+}
+
+body.theme-dark .app-sub-title,
+body.theme-dark .drawer-subtitle {
+  color: #94a3b8;
+}
+
+body.theme-dark .app-input {
+  background-color: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+body.theme-dark .app-input:focus {
+  border-color: #f59e0b;
+}
+
+body.theme-dark .app-select {
+  background-color: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+}
+
+body.theme-dark .app-floating-btn,
+body.theme-dark .theme-btn-bg,
+body.theme-dark .theme-alt-btn {
+  background-color: rgba(13, 19, 34, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+}
+body.theme-dark .app-floating-btn:hover {
+  background-color: #1e293b;
+}
+
+body.theme-dark .app-dropdown-menu {
+  background-color: rgba(13, 19, 34, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+}
+
+body.theme-dark .route-item-label {
+  background-color: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+}
+body.theme-dark .route-item-label:hover {
+  background-color: rgba(30, 41, 59, 0.8);
+}
+
+body.theme-dark .app-basemap-btn {
+  background-color: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+}
+
+body.theme-dark .app-basemap-active {
+  background-color: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #fcd34d;
+}
+
+body.theme-dark .app-drawer {
+  background-color: rgba(13, 19, 34, 0.98);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+body.theme-dark .app-drawer-header,
+body.theme-dark .app-drawer-footer {
+  background: linear-gradient(to right, #111827, #0d1322);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.theme-dark .app-close-btn,
+body.theme-dark .app-secondary-btn {
+  background-color: #1e293b;
+  color: #cbd5e1;
+}
+body.theme-dark .app-close-btn:hover,
+body.theme-dark .app-secondary-btn:hover {
+  background-color: #334155;
+  color: #ffffff;
+}
+
+body.theme-dark .drawer-box {
+  background-color: rgba(15, 23, 42, 0.7);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.theme-dark .drawer-text {
+  color: #e2e8f0;
+}
+
+/* ========================================================
+   2. TEMA SIANG (LIGHT MODE - HIGH CONTRAST & CLEAN)
+======================================================== */
+body.theme-light {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+body.theme-light #map {
+  background-color: #e2e8f0 !important;
+}
+
+body.theme-light #mobileHeader {
+  background-color: rgba(255, 255, 255, 0.98);
+  border-color: rgba(203, 213, 225, 0.8);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+body.theme-light #sidebarDirectory {
+  background-color: rgba(255, 255, 255, 0.98);
+  border-color: rgba(203, 213, 225, 0.8);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.05);
+}
+
+body.theme-light .header-divider,
+body.theme-light .filter-pills-bar,
+body.theme-light .region-select-bar,
+body.theme-light .app-footer-bar,
+body.theme-light .dropdown-divider {
+  border-color: rgba(226, 232, 240, 1);
+}
+
+body.theme-light .app-title-text,
+body.theme-light .app-main-title,
+body.theme-light .drawer-header-title,
+body.theme-light .dropdown-header-title {
+  color: #0f172a;
+}
+
+body.theme-light .app-sub-title,
+body.theme-light .drawer-subtitle {
+  color: #475569;
+}
+
+body.theme-light .app-input {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+}
+body.theme-light .app-input:focus {
+  border-color: #d97706;
+}
+
+body.theme-light .app-select {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+}
+
+body.theme-light .app-floating-btn,
+body.theme-light .theme-btn-bg,
+body.theme-light .theme-alt-btn {
+  background-color: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  color: #0f172a;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+body.theme-light .app-floating-btn:hover {
+  background-color: #f8fafc;
+}
+
+body.theme-light .app-dropdown-menu {
+  background-color: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  color: #0f172a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+body.theme-light .route-item-label {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+}
+body.theme-light .route-item-label:hover {
+  background-color: #f1f5f9;
+}
+
+body.theme-light .app-basemap-btn {
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+body.theme-light .app-basemap-active {
+  background-color: rgba(245, 158, 11, 0.15);
+  border: 1px solid #d97706;
+  color: #b45309;
+}
+
+body.theme-light .app-drawer {
+  background-color: rgba(255, 255, 255, 0.98);
+  border-color: rgba(203, 213, 225, 0.9);
+  box-shadow: -6px 0 30px rgba(0, 0, 0, 0.1);
+}
+
+body.theme-light .app-drawer-header,
+body.theme-light .app-drawer-footer {
+  background: linear-gradient(to right, #f8fafc, #ffffff);
+  border-color: rgba(226, 232, 240, 1);
+}
+
+body.theme-light .app-close-btn,
+body.theme-light .app-secondary-btn {
+  background-color: #e2e8f0;
+  color: #1e293b;
+}
+body.theme-light .app-close-btn:hover,
+body.theme-light .app-secondary-btn:hover {
+  background-color: #cbd5e1;
+  color: #0f172a;
+}
+
+body.theme-light .drawer-box {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+body.theme-light .drawer-text {
+  color: #334155;
+}
+
+/* Kartu Stasiun Tema Terang */
+body.theme-light .station-card-default {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+body.theme-light .station-card-default:hover {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+body.theme-light .station-card-active {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+  border-color: #d97706 !important;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.15) !important;
+}
+
+body.theme-light .station-card-title {
+  color: #0f172a !important;
+}
+body.theme-light .station-card-sub {
+  color: #475569 !important;
+}
+body.theme-light .station-card-elev {
+  color: #b45309 !important;
+}
+
+/* ========================================================
+   3. TRANSISI DAN ELEMEN NAVIGASI UMUM
+======================================================== */
 #rightControlsBar {
   transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   right: 14px;
@@ -18,11 +294,10 @@ body {
 
 @media (min-width: 768px) {
   body.drawer-is-open #rightControlsBar {
-    right: 456px; /* Menjaga jarak pas di samping drawer desktop (440px + 16px) */
+    right: 456px;
   }
 }
 
-/* 60 FPS Drawer Transitions */
 .station-sheet {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
@@ -59,12 +334,22 @@ body {
   font-size: 11px;
   font-weight: 600;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(15, 23, 42, 0.6);
   color: #94a3b8;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   white-space: nowrap;
+}
+
+body.theme-light .category-pill {
+  border-color: #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+}
+body.theme-light .category-pill:hover {
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 @media (min-width: 768px) {
@@ -74,16 +359,11 @@ body {
   }
 }
 
-.category-pill:hover {
-  background: rgba(30, 41, 59, 0.9);
-  color: #ffffff;
-}
-
 .category-pill.active {
-  background: linear-gradient(135deg, #d97706, #ea580c);
-  color: #ffffff;
-  border-color: rgba(251, 191, 36, 0.4);
-  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);
+  background: linear-gradient(135deg, #d97706, #ea580c) !important;
+  color: #ffffff !important;
+  border-color: rgba(251, 191, 36, 0.5) !important;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3) !important;
 }
 
 /* Custom Minimal Scrollbar */
@@ -94,11 +374,11 @@ body {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(51, 65, 85, 0.5);
+  background: rgba(100, 116, 139, 0.4);
   border-radius: 9999px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(245, 158, 11, 0.6);
+  background: rgba(245, 158, 11, 0.7);
 }
 
 /* Pin Stasiun Interaktif */
@@ -108,7 +388,7 @@ body {
   justify-content: center;
   border-radius: 9999px;
   color: white;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
 }
@@ -120,7 +400,7 @@ body {
   box-shadow: 0 0 18px rgba(245, 158, 11, 0.9);
 }
 
-/* Polyline Jalur Rel Animasi Halus */
+/* Polyline Jalur Rel */
 .railway-route-line {
   transition: stroke-width 0.2s ease, stroke-opacity 0.2s ease;
 }
@@ -132,17 +412,35 @@ body {
 
 /* Leaflet Zoom Control Styling */
 .leaflet-bar {
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: 10px !important;
   overflow: hidden;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4) !important;
 }
+
+body.theme-light .leaflet-bar {
+  border-color: rgba(203, 213, 225, 0.9) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
 .leaflet-bar a {
-  background-color: rgba(13, 19, 34, 0.9) !important;
+  background-color: rgba(13, 19, 34, 0.95) !important;
   color: #f59e0b !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
+
+body.theme-light .leaflet-bar a {
+  background-color: #ffffff !important;
+  color: #d97706 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
 .leaflet-bar a:hover {
   background-color: #1e293b !important;
   color: #ffffff !important;
+}
+
+body.theme-light .leaflet-bar a:hover {
+  background-color: #f1f5f9 !important;
+  color: #b45309 !important;
 }
